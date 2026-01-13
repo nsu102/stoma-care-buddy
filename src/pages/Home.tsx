@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -119,6 +119,18 @@ export default function Home() {
     resetDiagnosis();
     setView("main");
   }, [resetDiagnosis]);
+
+  // Listen for openCamera event from BottomNav
+  useEffect(() => {
+    const handleOpenCamera = () => {
+      handleStartDiagnosis();
+    };
+
+    window.addEventListener('openCamera', handleOpenCamera);
+    return () => {
+      window.removeEventListener('openCamera', handleOpenCamera);
+    };
+  }, [handleStartDiagnosis]);
 
   // Camera view
   if (view === "camera") {
