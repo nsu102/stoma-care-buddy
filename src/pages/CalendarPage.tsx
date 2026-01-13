@@ -35,15 +35,15 @@ export default function CalendarPage() {
     [currentMonth, getRecordsForMonth]
   );
 
-  // Get the highest risk level for a date
+  // Get the highest risk level for a date (0=정상, 1=주의, 2=위험)
   const getDateStatus = (date: Date): "good" | "warning" | "danger" | null => {
     const dateRecords = getRecordsByDate(date);
     if (dateRecords.length === 0) return null;
     
-    const maxRisk = Math.max(...dateRecords.map(r => r.risk_level || 1));
-    if (maxRisk >= 3) return "danger";
-    if (maxRisk >= 2) return "warning";
-    return "good";
+    const maxRisk = Math.max(...dateRecords.map(r => r.risk_level ?? 0));
+    if (maxRisk >= 2) return "danger";  // 위험도 2 = 위험
+    if (maxRisk >= 1) return "warning"; // 위험도 1 = 주의
+    return "good";                       // 위험도 0 = 정상
   };
 
   const getStatusDotColor = (status: string | null) => {
@@ -268,19 +268,19 @@ export default function CalendarPage() {
                     {selectedDateRecords.length > 0 ? (
                       selectedDateRecords.map((record) => (
                         <Card key={record.id} className={`p-5 border-2 shadow-sm ${
-                          record.risk_level === 3 ? "border-destructive/30" :
-                          record.risk_level === 2 ? "border-warning/30" :
+                          record.risk_level === 2 ? "border-destructive/30" :
+                          record.risk_level === 1 ? "border-warning/30" :
                           "border-success/30"
                         }`}>
-                          {/* 헤더: 진단명 + 위험도 */}
+                          {/* 헤더: 진단명 + 위험도 (0=정상, 1=주의, 2=위험) */}
                           <div className="flex items-start justify-between mb-3">
                             <h4 className="font-bold text-lg text-foreground">{record.diagnosis}</h4>
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              record.risk_level === 3 ? "bg-destructive/10 text-destructive" :
-                              record.risk_level === 2 ? "bg-warning/10 text-warning" :
+                              record.risk_level === 2 ? "bg-destructive/10 text-destructive" :
+                              record.risk_level === 1 ? "bg-warning/10 text-warning" :
                               "bg-success/10 text-success"
                             }`}>
-                              위험도 {record.risk_level === 3 ? "높음" : record.risk_level === 2 ? "중간" : "낮음"}
+                              위험도 {record.risk_level === 2 ? "높음" : record.risk_level === 1 ? "중간" : "낮음"}
                             </span>
                           </div>
 

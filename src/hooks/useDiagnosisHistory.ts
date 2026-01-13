@@ -92,14 +92,27 @@ export function useDiagnosisHistory() {
   }, [user, fetchRecords]);
 
   const getRecordsByDate = useCallback((date: Date) => {
-    const dateStr = date.toISOString().split("T")[0];
-    return records.filter(record => 
-      record.created_at.startsWith(dateStr)
-    );
+    // 한국 시간 기준으로 날짜 비교 (UTC+9)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const localDateStr = `${year}-${month}-${day}`;
+    
+    return records.filter(record => {
+      // created_at을 로컬 시간으로 변환하여 비교
+      const recordDate = new Date(record.created_at);
+      const recordYear = recordDate.getFullYear();
+      const recordMonth = String(recordDate.getMonth() + 1).padStart(2, '0');
+      const recordDay = String(recordDate.getDate()).padStart(2, '0');
+      const recordLocalDateStr = `${recordYear}-${recordMonth}-${recordDay}`;
+      
+      return recordLocalDateStr === localDateStr;
+    });
   }, [records]);
 
   const getRecordsForMonth = useCallback((year: number, month: number) => {
     return records.filter(record => {
+      // 로컬 시간 기준으로 월 비교
       const recordDate = new Date(record.created_at);
       return recordDate.getFullYear() === year && recordDate.getMonth() === month;
     });
