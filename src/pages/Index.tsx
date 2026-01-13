@@ -162,7 +162,13 @@ export default function Index() {
         <div className="container max-w-lg mx-auto px-4 py-6">
           <StepIndicator currentStep="result" />
           <DiagnosisResult
-            result={finalResult}
+            result={{
+              type: "result",
+              diagnosis: finalResult.diagnosis || "",
+              description: finalResult.description || "",
+              prescription: finalResult.prescription || "",
+              risk_level: finalResult.risk_level || "low",
+            }}
             correctedImageUrl={correctedImageUrl || finalResult.corrected_image_url}
             brightnessMessage={brightnessMessage || finalResult.brightness_message}
             onGoHome={handleGoHome}
