@@ -7,7 +7,9 @@ import { QuestionnaireStep } from "@/components/QuestionnaireStep";
 import { DiagnosisResult } from "@/components/DiagnosisResult";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { StepIndicator } from "@/components/StepIndicator";
-import { uploadImage, saveDiagnosisResult } from "@/lib/api";
+import { uploadImage } from "@/lib/api";
+import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   getNextStep, 
   startEmergencyQuestionnaire, 
@@ -40,6 +42,8 @@ const checklistItems = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { saveDiagnosis, records } = useDiagnosisHistory();
   const [view, setView] = useState<HomeView>("main");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
@@ -141,13 +145,12 @@ export default function Home() {
         setFinalResult(result);
         setView("result");
         
-        // 서버에 결과 저장 (실패해도 계속 진행)
-        saveDiagnosisResult({
+        // 데이터베이스에 결과 저장
+        await saveDiagnosis({
           diagnosis: result.diagnosis,
           description: result.description,
-          advice: result.advice,
           risk_level: result.risk_level,
-          corrected_image_url: correctedImageUrl || undefined,
+          image_url: correctedImageUrl || undefined,
         });
       } else if (nextStep.type === "retry") {
         // 재촬영 요청
@@ -341,16 +344,24 @@ export default function Home() {
         <div className="flex items-start justify-between mb-4">
           <div>
             <span className="inline-block px-3 py-1 bg-primary-foreground/20 rounded-full text-xs font-medium text-primary-foreground mb-2">
-              루카와 함께한 지 45일
+              총 {records.length}회 검사 완료
             </span>
             <h1 className="text-2xl font-bold text-primary-foreground">오늘도 잘 하고 있어요</h1>
-            <p className="text-primary-foreground/70 text-sm mt-1">최근 검사: 2026. 1. 20 오전 9:12</p>
+            <p className="text-primary-foreground/70 text-sm mt-1">
+              {records.length > 0 
+                ? `최근 검사: ${new Date(records[0].created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}`
+                : "아직 검사 기록이 없습니다"
+              }
+            </p>
           </div>
-          <div className="w-12 h-12 rounded-full bg-primary-foreground/20 overflow-hidden">
+          <button 
+            onClick={() => signOut()}
+            className="w-12 h-12 rounded-full bg-primary-foreground/20 overflow-hidden hover:bg-primary-foreground/30 transition-colors"
+          >
             <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-lg">
               👤
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Health Summary Card */}
@@ -358,15 +369,22 @@ export default function Home() {
           <p className="text-primary font-semibold text-sm mb-3">나의 건강 요약</p>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-xl font-bold text-warning">유의</p>
+              <p className="text-xl font-bold text-warning">
+                {records.length > 0 
+                  ? records[0].risk_level === 3 ? "위험" : records[0].risk_level === 2 ? "유의" : "정상"
+                  : "-"
+                }
+              </p>
               <p className="text-xs text-muted-foreground">진단 상태</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-foreground">45</p>
+              <p className="text-xl font-bold text-foreground">
+                {new Set(records.map(r => r.created_at.split('T')[0])).size}
+              </p>
               <p className="text-xs text-muted-foreground">총 기록일</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-foreground">38</p>
+              <p className="text-xl font-bold text-foreground">{records.length}</p>
               <p className="text-xs text-muted-foreground">촬영 횟수</p>
             </div>
           </div>
