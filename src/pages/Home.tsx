@@ -14,7 +14,8 @@ import {
   getRiskLevelString,
   type AIClass,
   type Question,
-  type FinalResult
+  type FinalResult,
+  type RetryResult
 } from "@/lib/triage";
 import { 
   Camera, 
@@ -111,16 +112,21 @@ export default function Home() {
       setIsLoading(true);
       setLoadingMessage("다음 질문 준비 중...");
       
-      // 다음 단계 가져오기
+      // 다음 단계 가져오기 (savedDiagnosis 전달)
       const nextStep = getNextStep(
         currentQuestion.id,
         selectedIndex,
-        aiClass
+        aiClass,
+        currentQuestion.temp_diagnosis || savedDiagnosis
       );
 
       if (nextStep.type === "question") {
-        // 다음 질문으로 이동
-        setCurrentQuestion(nextStep as Question);
+        // 다음 질문으로 이동 - temp_diagnosis가 있으면 저장
+        const nextQuestion = nextStep as Question;
+        if (nextQuestion.temp_diagnosis) {
+          setSavedDiagnosis(nextQuestion.temp_diagnosis);
+        }
+        setCurrentQuestion(nextQuestion);
       } else if (nextStep.type === "result") {
         // 최종 결과
         const result = nextStep as FinalResult;
@@ -135,6 +141,13 @@ export default function Home() {
           risk_level: result.risk_level,
           corrected_image_url: correctedImageUrl || undefined,
         });
+      } else if (nextStep.type === "retry") {
+        // 재촬영 요청
+        const retryStep = nextStep as RetryResult;
+        alert(retryStep.diagnosis);
+        // 이미지 삭제하고 카메라로 돌아가기
+        setCorrectedImageUrl(null);
+        setView("camera");
       }
     } catch (error) {
       console.error("Error during questionnaire:", error);
@@ -252,7 +265,7 @@ export default function Home() {
 
           <QuestionnaireStep
             question={currentQuestion.text}
-            options={currentQuestion.options.map(opt => opt.text)}
+            options={currentQuestion.options}
             onSelect={handleOptionSelect}
             isLoading={isLoading}
             stage={currentQuestion.id}
@@ -272,6 +285,7 @@ export default function Home() {
       description: finalResult.description,
       prescription: finalResult.advice,
       risk_level: getRiskLevelString(finalResult.risk_level),
+      emergency_alert: finalResult.emergency_alert,
     };
 
     return (

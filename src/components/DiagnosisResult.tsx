@@ -1,9 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, CheckCircle, AlertCircle, Home, History, Sun } from "lucide-react";
-import type { QuestionResponse } from "@/lib/api";
+interface DiagnosisResultData {
+  type: "result";
+  diagnosis: string;
+  description: string;
+  prescription: string;
+  risk_level: string;
+  emergency_alert?: string | null;
+}
 
 interface DiagnosisResultProps {
-  result: QuestionResponse;
+  result: DiagnosisResultData;
   correctedImageUrl?: string;
   brightnessMessage?: string;
   onGoHome: () => void;
@@ -97,6 +104,19 @@ export function DiagnosisResult({
           </div>
         </div>
       </div>
+
+      {/* Emergency Alert */}
+      {result.emergency_alert && (
+        <div className="bg-destructive/10 border-2 border-destructive/30 rounded-2xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-destructive mb-3 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            긴급 알림
+          </h3>
+          <p className="text-destructive font-medium leading-relaxed whitespace-pre-line">
+            {result.emergency_alert}
+          </p>
+        </div>
+      )}
 
       {/* Prescription Card */}
       {result.prescription && (
