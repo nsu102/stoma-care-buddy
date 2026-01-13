@@ -383,6 +383,13 @@ function finalResult(diagnosisText: string): FinalResult {
     maxRiskLevel = 2;
   }
 
+  // 응급 문진 결과 (E_Q1~E_Q4 관련)는 위험도 2로 설정
+  const emergencyKeywords = ["활동성 출혈", "장폐색", "급성 괴사", "괴사", "감돈된 장루 탈출"];
+  const hasEmergency = emergencyKeywords.some(keyword => diagnosisText.includes(keyword));
+  if (hasEmergency) {
+    maxRiskLevel = 2;
+  }
+
   // 진단명에 포함된 모든 키워드를 순회하며 정보 수집
   for (const [keyword, info] of Object.entries(TREATMENT_DATA)) {
     if (diagnosisText.includes(keyword)) {
