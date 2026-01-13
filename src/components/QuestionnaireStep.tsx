@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { ChevronRight, ChevronLeft, AlertCircle } from "lucide-react";
 
 interface QuestionnaireStepProps {
   question: string;
   options: string[];
   onSelect: (index: number) => void;
+  onBack?: () => void;
+  canGoBack?: boolean;
   isLoading?: boolean;
   stage?: string;
 }
@@ -14,6 +16,8 @@ export function QuestionnaireStep({
   question,
   options,
   onSelect,
+  onBack,
+  canGoBack = false,
   isLoading = false,
   stage,
 }: QuestionnaireStepProps) {
@@ -68,23 +72,36 @@ export function QuestionnaireStep({
         ))}
       </div>
 
-      {/* Confirm button */}
-      <Button
-        variant="hero"
-        size="xl"
-        className="w-full"
-        onClick={handleConfirm}
-        disabled={selectedIndex === null || isLoading}
-      >
-        {isLoading ? (
-          <span className="animate-pulse-soft">처리 중...</span>
-        ) : (
-          <>
-            다음으로
-            <ChevronRight className="ml-2 h-5 w-5" />
-          </>
+      {/* Action buttons */}
+      <div className="flex gap-3">
+        {canGoBack && onBack && (
+          <Button
+            variant="outline"
+            size="xl"
+            className="flex-shrink-0"
+            onClick={onBack}
+            disabled={isLoading}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
         )}
-      </Button>
+        <Button
+          variant="hero"
+          size="xl"
+          className="flex-1"
+          onClick={handleConfirm}
+          disabled={selectedIndex === null || isLoading}
+        >
+          {isLoading ? (
+            <span className="animate-pulse-soft">처리 중...</span>
+          ) : (
+            <>
+              다음으로
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
