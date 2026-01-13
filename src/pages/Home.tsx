@@ -145,12 +145,14 @@ export default function Home() {
         setFinalResult(result);
         setView("result");
         
-        // 데이터베이스에 결과 저장
+        // 데이터베이스에 결과 저장 (모든 정보 포함)
         await saveDiagnosis({
           diagnosis: result.diagnosis,
           description: result.description,
           risk_level: result.risk_level,
           image_url: correctedImageUrl || undefined,
+          advice: result.advice || undefined,
+          emergency_alert: result.emergency_alert || undefined,
         });
       } else if (nextStep.type === "retry") {
         // 재촬영 요청

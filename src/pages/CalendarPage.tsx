@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, CheckCircle2, Circle, FolderOpen, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, CheckCircle2, Circle, FolderOpen, Loader2, AlertTriangle, Stethoscope } from "lucide-react";
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
@@ -295,11 +295,33 @@ export default function CalendarPage() {
                             </div>
                           )}
 
-                          {/* 설명 */}
+                          {/* 진단 설명 */}
                           {record.description && (
                             <div className="mb-4">
                               <h5 className="text-sm font-semibold text-foreground mb-1">진단 설명</h5>
                               <p className="text-sm text-muted-foreground leading-relaxed">{record.description}</p>
+                            </div>
+                          )}
+
+                          {/* 긴급 알림 */}
+                          {record.emergency_alert && (
+                            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/30 rounded-xl">
+                              <h5 className="text-sm font-semibold text-destructive mb-2 flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4" />
+                                긴급 알림
+                              </h5>
+                              <p className="text-sm text-destructive leading-relaxed whitespace-pre-line">{record.emergency_alert}</p>
+                            </div>
+                          )}
+
+                          {/* 권장 조치 (advice) */}
+                          {record.advice && (
+                            <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+                              <h5 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2">
+                                <Stethoscope className="h-4 w-4" />
+                                권장 조치
+                              </h5>
+                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">{record.advice}</p>
                             </div>
                           )}
 

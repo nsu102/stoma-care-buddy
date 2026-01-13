@@ -16,10 +16,12 @@ export type Database = {
     Tables: {
       diagnosis_history: {
         Row: {
+          advice: string | null
           brightness: number | null
           created_at: string
           description: string | null
           diagnosis: string
+          emergency_alert: string | null
           id: string
           image_url: string | null
           risk_level: number | null
@@ -27,10 +29,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          advice?: string | null
           brightness?: number | null
           created_at?: string
           description?: string | null
           diagnosis: string
+          emergency_alert?: string | null
           id?: string
           image_url?: string | null
           risk_level?: number | null
@@ -38,10 +42,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          advice?: string | null
           brightness?: number | null
           created_at?: string
           description?: string | null
           diagnosis?: string
+          emergency_alert?: string | null
           id?: string
           image_url?: string | null
           risk_level?: number | null
