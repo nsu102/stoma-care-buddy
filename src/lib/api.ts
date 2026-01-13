@@ -92,7 +92,6 @@ export interface SaveDiagnosisRequest {
   description: string;
   advice: string;
   risk_level: number;
-  emergency_alert?: string | null;
   corrected_image_url?: string;
 }
 

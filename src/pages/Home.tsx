@@ -14,8 +14,7 @@ import {
   getRiskLevelString,
   type AIClass,
   type Question,
-  type FinalResult,
-  type TriageStep
+  type FinalResult
 } from "@/lib/triage";
 import { 
   Camera, 
@@ -111,24 +110,17 @@ export default function Home() {
     try {
       setIsLoading(true);
       setLoadingMessage("다음 질문 준비 중...");
-
-      // 현재 질문의 temp_diagnosis가 있으면 저장
-      const currentDiagnosis = currentQuestion.temp_diagnosis || savedDiagnosis;
       
       // 다음 단계 가져오기
       const nextStep = getNextStep(
         currentQuestion.id,
         selectedIndex,
-        aiClass,
-        currentDiagnosis
+        aiClass
       );
 
       if (nextStep.type === "question") {
         // 다음 질문으로 이동
         setCurrentQuestion(nextStep as Question);
-        if ((nextStep as Question).temp_diagnosis) {
-          setSavedDiagnosis((nextStep as Question).temp_diagnosis!);
-        }
       } else if (nextStep.type === "result") {
         // 최종 결과
         const result = nextStep as FinalResult;
@@ -141,7 +133,6 @@ export default function Home() {
           description: result.description,
           advice: result.advice,
           risk_level: result.risk_level,
-          emergency_alert: result.emergency_alert,
           corrected_image_url: correctedImageUrl || undefined,
         });
       }
@@ -151,7 +142,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentQuestion, aiClass, savedDiagnosis, correctedImageUrl]);
+  }, [currentQuestion, aiClass, correctedImageUrl]);
 
   const handleGoHome = useCallback(() => {
     resetDiagnosis();
@@ -261,7 +252,7 @@ export default function Home() {
 
           <QuestionnaireStep
             question={currentQuestion.text}
-            options={currentQuestion.options}
+            options={currentQuestion.options.map(opt => opt.text)}
             onSelect={handleOptionSelect}
             isLoading={isLoading}
             stage={currentQuestion.id}
@@ -279,7 +270,7 @@ export default function Home() {
       type: "result" as const,
       diagnosis: finalResult.diagnosis,
       description: finalResult.description,
-      prescription: finalResult.advice + (finalResult.emergency_alert ? `\n\n⚠️ ${finalResult.emergency_alert}` : ""),
+      prescription: finalResult.advice,
       risk_level: getRiskLevelString(finalResult.risk_level),
     };
 
