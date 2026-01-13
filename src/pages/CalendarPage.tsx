@@ -264,28 +264,62 @@ export default function CalendarPage() {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="diagnosis" className="mt-0 space-y-3">
+                  <TabsContent value="diagnosis" className="mt-0 space-y-4">
                     {selectedDateRecords.length > 0 ? (
                       selectedDateRecords.map((record) => (
-                        <Card key={record.id} className="p-4 border-0 shadow-sm">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-foreground">{record.diagnosis}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        <Card key={record.id} className={`p-5 border-2 shadow-sm ${
+                          record.risk_level === 3 ? "border-destructive/30" :
+                          record.risk_level === 2 ? "border-warning/30" :
+                          "border-success/30"
+                        }`}>
+                          {/* 헤더: 진단명 + 위험도 */}
+                          <div className="flex items-start justify-between mb-3">
+                            <h4 className="font-bold text-lg text-foreground">{record.diagnosis}</h4>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                               record.risk_level === 3 ? "bg-destructive/10 text-destructive" :
                               record.risk_level === 2 ? "bg-warning/10 text-warning" :
                               "bg-success/10 text-success"
                             }`}>
-                              {record.risk_level === 3 ? "위험" : record.risk_level === 2 ? "유의" : "정상"}
+                              위험도 {record.risk_level === 3 ? "높음" : record.risk_level === 2 ? "중간" : "낮음"}
                             </span>
                           </div>
+
+                          {/* 이미지 (있는 경우) */}
+                          {record.image_url && (
+                            <div className="aspect-video bg-muted rounded-xl overflow-hidden mb-4">
+                              <img 
+                                src={record.image_url} 
+                                alt="장루 이미지" 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+
+                          {/* 설명 */}
                           {record.description && (
-                            <p className="text-sm text-muted-foreground">{record.description}</p>
+                            <div className="mb-4">
+                              <h5 className="text-sm font-semibold text-foreground mb-1">진단 설명</h5>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{record.description}</p>
+                            </div>
                           )}
-                          {record.sacs_grade && (
-                            <p className="text-xs text-primary mt-2">SACS 등급: {record.sacs_grade}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {format(new Date(record.created_at), "a h:mm", { locale: ko })}
+
+                          {/* 추가 정보 */}
+                          <div className="flex flex-wrap gap-3 text-xs">
+                            {record.sacs_grade && (
+                              <span className="px-2 py-1 bg-primary/10 text-primary rounded-md">
+                                SACS 등급: {record.sacs_grade}
+                              </span>
+                            )}
+                            {record.brightness !== null && record.brightness !== undefined && (
+                              <span className="px-2 py-1 bg-muted text-muted-foreground rounded-md">
+                                밝기: {record.brightness.toFixed(1)}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* 시간 */}
+                          <p className="text-xs text-muted-foreground mt-4 pt-3 border-t border-border">
+                            {format(new Date(record.created_at), "yyyy년 M월 d일 a h:mm", { locale: ko })} 진단
                           </p>
                         </Card>
                       ))
