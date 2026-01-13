@@ -268,9 +268,9 @@ export default function CalendarPage() {
                     {selectedDateRecords.length > 0 ? (
                       selectedDateRecords.map((record) => (
                         <Card key={record.id} className="p-4 border-0 shadow-sm">
-                          <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-start justify-between mb-3">
                             <h4 className="font-semibold text-foreground">{record.diagnosis}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
                               record.risk_level === 3 ? "bg-destructive/10 text-destructive" :
                               record.risk_level === 2 ? "bg-warning/10 text-warning" :
                               "bg-success/10 text-success"
@@ -278,11 +278,16 @@ export default function CalendarPage() {
                               {record.risk_level === 3 ? "위험" : record.risk_level === 2 ? "유의" : "정상"}
                             </span>
                           </div>
+                          
                           {record.description && (
-                            <p className="text-sm text-muted-foreground">{record.description}</p>
+                            <div className="bg-muted/50 rounded-lg p-3 mb-3">
+                              <p className="text-xs font-medium text-primary mb-1">💊 처방 및 조언</p>
+                              <p className="text-sm text-foreground whitespace-pre-line">{record.description}</p>
+                            </div>
                           )}
+                          
                           {record.sacs_grade && (
-                            <p className="text-xs text-primary mt-2">SACS 등급: {record.sacs_grade}</p>
+                            <p className="text-xs text-primary">SACS 등급: {record.sacs_grade}</p>
                           )}
                           <p className="text-xs text-muted-foreground mt-2">
                             {format(new Date(record.created_at), "a h:mm", { locale: ko })}
