@@ -154,6 +154,11 @@ function finalResult(diagnosisText: string): FinalResult {
   // 안전 키워드
   const safeKeywords = ["정상", "흉터", "대장흑색증", "단순 타박상"];
 
+  // L3는 무조건 위험도 2 (위험)으로 설정
+  if (diagnosisText.includes("[L3]")) {
+    maxRiskLevel = 2;
+  }
+
   // 진단명에 포함된 모든 키워드를 순회하며 정보 수집
   for (const [keyword, info] of Object.entries(TREATMENT_DATA)) {
     if (diagnosisText.includes(keyword)) {

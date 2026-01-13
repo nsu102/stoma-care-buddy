@@ -51,6 +51,7 @@ export default function Home() {
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [savedDiagnosis, setSavedDiagnosis] = useState<string>("");
   const [finalResult, setFinalResult] = useState<FinalResult | null>(null);
+  const [questionHistory, setQuestionHistory] = useState<{ question: Question; diagnosis: string }[]>([]);
 
   const resetDiagnosis = useCallback(() => {
     setCorrectedImageUrl(null);
@@ -59,6 +60,7 @@ export default function Home() {
     setCurrentQuestion(null);
     setSavedDiagnosis("");
     setFinalResult(null);
+    setQuestionHistory([]);
   }, []);
 
   const handleStartDiagnosis = useCallback(() => {
@@ -112,6 +114,12 @@ export default function Home() {
       setIsLoading(true);
       setLoadingMessage("다음 질문 준비 중...");
       
+      // 현재 질문을 히스토리에 저장
+      setQuestionHistory(prev => [...prev, { 
+        question: currentQuestion, 
+        diagnosis: currentQuestion.temp_diagnosis || savedDiagnosis 
+      }]);
+      
       // 다음 단계 가져오기 (savedDiagnosis 전달)
       const nextStep = getNextStep(
         currentQuestion.id,
@@ -147,6 +155,7 @@ export default function Home() {
         alert(retryStep.diagnosis);
         // 이미지 삭제하고 카메라로 돌아가기
         setCorrectedImageUrl(null);
+        setQuestionHistory([]);
         setView("camera");
       }
     } catch (error) {
@@ -155,7 +164,25 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentQuestion, aiClass, correctedImageUrl]);
+  }, [currentQuestion, aiClass, correctedImageUrl, savedDiagnosis]);
+
+  const handleGoBack = useCallback(() => {
+    if (questionHistory.length === 0) {
+      // 히스토리가 없으면 메인으로
+      setView("main");
+      return;
+    }
+    
+    // 마지막 질문으로 돌아가기
+    const newHistory = [...questionHistory];
+    const lastState = newHistory.pop();
+    
+    if (lastState) {
+      setCurrentQuestion(lastState.question);
+      setSavedDiagnosis(lastState.diagnosis);
+      setQuestionHistory(newHistory);
+    }
+  }, [questionHistory]);
 
   const handleGoHome = useCallback(() => {
     resetDiagnosis();
@@ -267,6 +294,8 @@ export default function Home() {
             question={currentQuestion.text}
             options={currentQuestion.options}
             onSelect={handleOptionSelect}
+            onBack={handleGoBack}
+            canGoBack={true}
             isLoading={isLoading}
             stage={currentQuestion.id}
           />
