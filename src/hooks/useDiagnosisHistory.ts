@@ -11,6 +11,8 @@ export interface DiagnosisRecord {
   risk_level: number | null;
   brightness: number | null;
   sacs_grade: string | null;
+  advice: string | null;
+  emergency_alert: string | null;
   created_at: string;
 }
 
@@ -21,6 +23,8 @@ export interface SaveDiagnosisParams {
   risk_level?: number;
   brightness?: number;
   sacs_grade?: string;
+  advice?: string;
+  emergency_alert?: string;
 }
 
 export function useDiagnosisHistory() {
@@ -72,6 +76,8 @@ export function useDiagnosisHistory() {
           risk_level: params.risk_level || null,
           brightness: params.brightness || null,
           sacs_grade: params.sacs_grade || null,
+          advice: params.advice || null,
+          emergency_alert: params.emergency_alert || null,
         });
 
       if (error) throw error;
