@@ -1,7 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CameraCapture } from "@/components/CameraCapture";
 import { QuestionnaireStep } from "@/components/QuestionnaireStep";
 import { DiagnosisResult } from "@/components/DiagnosisResult";
@@ -9,6 +11,7 @@ import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { StepIndicator } from "@/components/StepIndicator";
 import { uploadImage } from "@/lib/api";
 import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
+import { useCalendarData } from "@/hooks/useCalendarData";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   getNextStep, 
@@ -21,8 +24,6 @@ import {
 } from "@/lib/triage";
 import { 
   Camera, 
-  CheckCircle2, 
-  Circle, 
   Plus,
   Search,
   Calendar,
@@ -30,23 +31,37 @@ import {
   Gift,
   Edit3,
   Trash2,
-  Bug
+  Bug,
+  Check,
+  X,
+  Loader2
 } from "lucide-react";
+import { toast } from "sonner";
 
 type HomeView = "main" | "camera" | "questionnaire" | "result" | "debug";
-
-const checklistItems = [
-  { id: 1, label: "장루 주변 연고 바르기", date: "25/01/27", completed: true },
-  { id: 2, label: "항생제 복용", date: "25/01/27", completed: false },
-];
 
 export default function Home() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { saveDiagnosis, records } = useDiagnosisHistory();
+  const { 
+    getChecklistsByDate, 
+    addChecklistItem, 
+    updateChecklistItem, 
+    deleteChecklistItem, 
+    toggleChecklistItem,
+    isLoading: checklistLoading 
+  } = useCalendarData();
+  
   const [view, setView] = useState<HomeView>("main");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  
+  // Checklist state
+  const [isAddingChecklist, setIsAddingChecklist] = useState(false);
+  const [newChecklistLabel, setNewChecklistLabel] = useState("");
+  const [editingChecklistId, setEditingChecklistId] = useState<string | null>(null);
+  const [editingChecklistLabel, setEditingChecklistLabel] = useState("");
   
   // Diagnosis state
   const [correctedImageUrl, setCorrectedImageUrl] = useState<string | null>(null);
@@ -56,6 +71,54 @@ export default function Home() {
   const [savedDiagnosis, setSavedDiagnosis] = useState<string>("");
   const [finalResult, setFinalResult] = useState<FinalResult | null>(null);
   const [questionHistory, setQuestionHistory] = useState<{ question: Question; diagnosis: string }[]>([]);
+
+  // Get today's checklists
+  const todayChecklists = useMemo(() => getChecklistsByDate(new Date()), [getChecklistsByDate]);
+
+  // Checklist handlers
+  const handleAddChecklist = async () => {
+    if (!newChecklistLabel.trim()) return;
+    
+    const result = await addChecklistItem(new Date(), newChecklistLabel.trim());
+    if (result.success) {
+      setNewChecklistLabel("");
+      setIsAddingChecklist(false);
+      toast.success("체크리스트가 추가되었습니다");
+    } else {
+      toast.error(result.error || "추가에 실패했습니다");
+    }
+  };
+
+  const handleUpdateChecklist = async (id: string) => {
+    if (!editingChecklistLabel.trim()) return;
+    
+    const result = await updateChecklistItem(id, { label: editingChecklistLabel.trim() });
+    if (result.success) {
+      setEditingChecklistId(null);
+      setEditingChecklistLabel("");
+      toast.success("수정되었습니다");
+    } else {
+      toast.error(result.error || "수정에 실패했습니다");
+    }
+  };
+
+  const handleDeleteChecklist = async (id: string) => {
+    const result = await deleteChecklistItem(id);
+    if (result.success) {
+      toast.success("삭제되었습니다");
+    } else {
+      toast.error(result.error || "삭제에 실패했습니다");
+    }
+  };
+
+  const handleToggleChecklist = async (id: string) => {
+    await toggleChecklistItem(id);
+  };
+
+  const startEditingChecklist = (id: string, label: string) => {
+    setEditingChecklistId(id);
+    setEditingChecklistLabel(label);
+  };
 
   const resetDiagnosis = useCallback(() => {
     setCorrectedImageUrl(null);
@@ -479,45 +542,147 @@ export default function Home() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-foreground">체크리스트</h3>
-              <Button variant="ghost" size="icon" className="h-6 w-6 text-primary">
+              <h3 className="font-semibold text-foreground">오늘의 체크리스트</h3>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 text-primary"
+                onClick={() => setIsAddingChecklist(true)}
+              >
                 <Plus className="h-4 w-4" />
               </Button>
+              {checklistLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
             </div>
-            <span className="text-xs text-muted-foreground">최근 생성된 순</span>
+            <span className="text-xs text-muted-foreground">
+              {todayChecklists.filter(c => c.completed).length}/{todayChecklists.length} 완료
+            </span>
           </div>
           
           <div className="space-y-2">
-            {checklistItems.map((item) => (
-              <Card 
-                key={item.id}
-                className={`p-4 border-0 shadow-sm ${item.completed ? 'bg-primary/5' : 'bg-card'}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {item.completed ? (
-                      <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    )}
-                    <div>
-                      <span className={item.completed ? "text-foreground" : "text-foreground"}>
-                        {item.label}
-                      </span>
-                      <span className="text-xs text-muted-foreground ml-2">@{item.date}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                      <Edit3 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {/* Add new checklist input */}
+            {isAddingChecklist && (
+              <Card className="p-3 border-0 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={newChecklistLabel}
+                    onChange={(e) => setNewChecklistLabel(e.target.value)}
+                    placeholder="새 할 일 입력..."
+                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAddChecklist();
+                      if (e.key === "Escape") {
+                        setIsAddingChecklist(false);
+                        setNewChecklistLabel("");
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <Button size="icon" className="h-9 w-9" onClick={handleAddChecklist}>
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9"
+                    onClick={() => {
+                      setIsAddingChecklist(false);
+                      setNewChecklistLabel("");
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               </Card>
-            ))}
+            )}
+
+            {todayChecklists.length > 0 ? (
+              todayChecklists.map((item) => (
+                <Card 
+                  key={item.id}
+                  className={`p-4 border-0 shadow-sm ${item.completed ? 'bg-primary/5' : 'bg-card'}`}
+                >
+                  <div className="flex items-center justify-between">
+                    {editingChecklistId === item.id ? (
+                      <div className="flex items-center gap-2 flex-1 mr-2">
+                        <Input
+                          value={editingChecklistLabel}
+                          onChange={(e) => setEditingChecklistLabel(e.target.value)}
+                          className="flex-1"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleUpdateChecklist(item.id);
+                            if (e.key === "Escape") {
+                              setEditingChecklistId(null);
+                              setEditingChecklistLabel("");
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <Button size="icon" className="h-8 w-8" onClick={() => handleUpdateChecklist(item.id)}>
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => {
+                            setEditingChecklistId(null);
+                            setEditingChecklistLabel("");
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <div 
+                          className="flex items-center gap-3 cursor-pointer flex-1"
+                          onClick={() => handleToggleChecklist(item.id)}
+                        >
+                          <Checkbox 
+                            checked={item.completed}
+                            onCheckedChange={() => handleToggleChecklist(item.id)}
+                            className="h-5 w-5"
+                          />
+                          <span className={`${item.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                            {item.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground"
+                            onClick={() => startEditingChecklist(item.id, item.label)}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteChecklist(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
+              ))
+            ) : !isAddingChecklist ? (
+              <Card className="p-6 border-0 shadow-sm text-center">
+                <p className="text-muted-foreground text-sm">
+                  오늘의 체크리스트가 없습니다.<br />
+                  <button 
+                    className="text-primary font-medium mt-1"
+                    onClick={() => setIsAddingChecklist(true)}
+                  >
+                    + 할 일 추가하기
+                  </button>
+                </p>
+              </Card>
+            ) : null}
           </div>
         </div>
 
