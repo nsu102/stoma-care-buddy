@@ -29,9 +29,10 @@ export interface DiagnosisRecord {
   corrected_image_url: string;
 }
 
-export async function uploadImage(imageBlob: Blob): Promise<UploadResponse> {
+export async function uploadImage(imageBlob: Blob, userId: string = "anonymous"): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append("file", imageBlob, "stoma_image.jpg");
+  formData.append("user_id", userId);
 
   const response = await fetch(`${API_BASE_URL}/upload`, {
     method: "POST",
