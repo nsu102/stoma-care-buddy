@@ -2,32 +2,124 @@ import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, CheckCircle2, Circle, FolderOpen, Loader2, AlertTriangle, Stethoscope } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, X, Check, FolderOpen, Loader2, AlertTriangle, Stethoscope, Save } from "lucide-react";
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
+import { useCalendarData } from "@/hooks/useCalendarData";
 import { useAuth } from "@/contexts/AuthContext";
-
-const checklistItems = [
-  { id: 1, label: "장루 주변 연고 바르기", date: "25/01/27", completed: true },
-  { id: 2, label: "항생제 복용", date: "25/01/27", completed: false },
-];
+import { toast } from "sonner";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function CalendarPage() {
   const { user } = useAuth();
-  const { records, isLoading, getRecordsByDate, getRecordsForMonth } = useDiagnosisHistory();
+  const { records, isLoading: diagnosisLoading, getRecordsByDate, getRecordsForMonth } = useDiagnosisHistory();
+  const { 
+    getMemoByDate, 
+    getChecklistsByDate, 
+    saveMemo, 
+    addChecklistItem, 
+    updateChecklistItem, 
+    deleteChecklistItem, 
+    toggleChecklistItem,
+    isLoading: calendarLoading 
+  } = useCalendarData();
   
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState("photo");
+  
+  // Memo state
+  const [memoContent, setMemoContent] = useState("");
+  const [isMemoEditing, setIsMemoEditing] = useState(false);
+  const [isSavingMemo, setIsSavingMemo] = useState(false);
+  
+  // Checklist state
+  const [newChecklistLabel, setNewChecklistLabel] = useState("");
+  const [isAddingChecklist, setIsAddingChecklist] = useState(false);
+  const [editingChecklistId, setEditingChecklistId] = useState<string | null>(null);
+  const [editingChecklistLabel, setEditingChecklistLabel] = useState("");
+  
+  const isLoading = diagnosisLoading || calendarLoading;
 
   // Get records for selected date
   const selectedDateRecords = useMemo(() => 
     getRecordsByDate(selectedDate),
     [selectedDate, getRecordsByDate]
   );
+
+  // Get memo and checklists for selected date
+  const selectedDateMemo = useMemo(() => getMemoByDate(selectedDate), [selectedDate, getMemoByDate]);
+  const selectedDateChecklists = useMemo(() => getChecklistsByDate(selectedDate), [selectedDate, getChecklistsByDate]);
+
+  // Initialize memo content when date or memo changes
+  useMemo(() => {
+    if (!isMemoEditing) {
+      setMemoContent(selectedDateMemo?.content || "");
+    }
+  }, [selectedDateMemo, selectedDate, isMemoEditing]);
+
+  // Handlers
+  const handleSaveMemo = async () => {
+    setIsSavingMemo(true);
+    const result = await saveMemo(selectedDate, memoContent);
+    setIsSavingMemo(false);
+    
+    if (result.success) {
+      toast.success("메모가 저장되었습니다");
+      setIsMemoEditing(false);
+    } else {
+      toast.error(result.error || "메모 저장에 실패했습니다");
+    }
+  };
+
+  const handleAddChecklist = async () => {
+    if (!newChecklistLabel.trim()) return;
+    
+    const result = await addChecklistItem(selectedDate, newChecklistLabel.trim());
+    if (result.success) {
+      setNewChecklistLabel("");
+      setIsAddingChecklist(false);
+      toast.success("체크리스트가 추가되었습니다");
+    } else {
+      toast.error(result.error || "추가에 실패했습니다");
+    }
+  };
+
+  const handleUpdateChecklist = async (id: string) => {
+    if (!editingChecklistLabel.trim()) return;
+    
+    const result = await updateChecklistItem(id, { label: editingChecklistLabel.trim() });
+    if (result.success) {
+      setEditingChecklistId(null);
+      setEditingChecklistLabel("");
+      toast.success("수정되었습니다");
+    } else {
+      toast.error(result.error || "수정에 실패했습니다");
+    }
+  };
+
+  const handleDeleteChecklist = async (id: string) => {
+    const result = await deleteChecklistItem(id);
+    if (result.success) {
+      toast.success("삭제되었습니다");
+    } else {
+      toast.error(result.error || "삭제에 실패했습니다");
+    }
+  };
+
+  const handleToggleChecklist = async (id: string) => {
+    await toggleChecklistItem(id);
+  };
+
+  const startEditingChecklist = (id: string, label: string) => {
+    setEditingChecklistId(id);
+    setEditingChecklistLabel(label);
+  };
 
   // Get records for current month to display dots
   const monthRecords = useMemo(() => 
@@ -353,9 +445,62 @@ export default function CalendarPage() {
                   </TabsContent>
 
                   <TabsContent value="memo" className="mt-0">
-                    <div className="text-center py-8 text-muted-foreground">
-                      메모 기능은 준비 중입니다
-                    </div>
+                    <Card className="p-4 border-0 shadow-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-foreground">오늘의 메모</h4>
+                        {!isMemoEditing ? (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setIsMemoEditing(true)}
+                            className="text-primary"
+                          >
+                            <Edit3 className="h-4 w-4 mr-1" />
+                            수정
+                          </Button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => {
+                                setIsMemoEditing(false);
+                                setMemoContent(selectedDateMemo?.content || "");
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              onClick={handleSaveMemo}
+                              disabled={isSavingMemo}
+                            >
+                              {isSavingMemo ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Save className="h-4 w-4 mr-1" />
+                                  저장
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {isMemoEditing ? (
+                        <Textarea
+                          value={memoContent}
+                          onChange={(e) => setMemoContent(e.target.value)}
+                          placeholder="오늘의 상태, 느낌, 특이사항 등을 기록하세요..."
+                          className="min-h-[150px] resize-none"
+                        />
+                      ) : (
+                        <div className="min-h-[100px] text-sm text-muted-foreground whitespace-pre-wrap">
+                          {memoContent || "메모가 없습니다. 수정 버튼을 눌러 작성해보세요."}
+                        </div>
+                      )}
+                    </Card>
                   </TabsContent>
                 </Tabs>
               </div>
@@ -363,39 +508,138 @@ export default function CalendarPage() {
               {/* Checklist */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-foreground">체크리스트</h3>
-                  <span className="text-xs text-muted-foreground">최근 생성된 순</span>
+                  <h3 className="font-semibold text-foreground">
+                    {format(selectedDate, "M월 d일", { locale: ko })} 체크리스트
+                  </h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsAddingChecklist(true)}
+                    className="text-primary"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    추가
+                  </Button>
                 </div>
 
                 <div className="space-y-2">
-                  {checklistItems.map((item) => (
-                    <Card 
-                      key={item.id}
-                      className={`p-4 border-0 shadow-sm ${item.completed ? 'bg-primary/5' : 'bg-card'}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {item.completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                          ) : (
-                            <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                          )}
-                          <div>
-                            <span className="text-foreground">{item.label}</span>
-                            <span className="text-xs text-muted-foreground ml-2">@{item.date}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                  {/* Add new checklist input */}
+                  {isAddingChecklist && (
+                    <Card className="p-3 border-0 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={newChecklistLabel}
+                          onChange={(e) => setNewChecklistLabel(e.target.value)}
+                          placeholder="새 할 일 입력..."
+                          className="flex-1"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleAddChecklist();
+                            if (e.key === "Escape") {
+                              setIsAddingChecklist(false);
+                              setNewChecklistLabel("");
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <Button size="icon" className="h-9 w-9" onClick={handleAddChecklist}>
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-9 w-9"
+                          onClick={() => {
+                            setIsAddingChecklist(false);
+                            setNewChecklistLabel("");
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </Card>
-                  ))}
+                  )}
+
+                  {selectedDateChecklists.length > 0 ? (
+                    selectedDateChecklists.map((item) => (
+                      <Card 
+                        key={item.id}
+                        className={`p-4 border-0 shadow-sm ${item.completed ? 'bg-primary/5' : 'bg-card'}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          {editingChecklistId === item.id ? (
+                            <div className="flex items-center gap-2 flex-1 mr-2">
+                              <Input
+                                value={editingChecklistLabel}
+                                onChange={(e) => setEditingChecklistLabel(e.target.value)}
+                                className="flex-1"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") handleUpdateChecklist(item.id);
+                                  if (e.key === "Escape") {
+                                    setEditingChecklistId(null);
+                                    setEditingChecklistLabel("");
+                                  }
+                                }}
+                                autoFocus
+                              />
+                              <Button size="icon" className="h-8 w-8" onClick={() => handleUpdateChecklist(item.id)}>
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => {
+                                  setEditingChecklistId(null);
+                                  setEditingChecklistLabel("");
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <>
+                              <div 
+                                className="flex items-center gap-3 cursor-pointer flex-1"
+                                onClick={() => handleToggleChecklist(item.id)}
+                              >
+                                <Checkbox 
+                                  checked={item.completed}
+                                  onCheckedChange={() => handleToggleChecklist(item.id)}
+                                  className="h-5 w-5"
+                                />
+                                <span className={`text-foreground ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                  {item.label}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8 text-muted-foreground"
+                                  onClick={() => startEditingChecklist(item.id, item.label)}
+                                >
+                                  <Edit3 className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                  onClick={() => handleDeleteChecklist(item.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </Card>
+                    ))
+                  ) : !isAddingChecklist ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      체크리스트가 없습니다.<br />
+                      <span className="text-sm">추가 버튼을 눌러 할 일을 추가해보세요.</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </>
