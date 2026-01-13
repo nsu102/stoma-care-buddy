@@ -32,7 +32,7 @@ export interface DiagnosisRecord {
 export async function uploadImage(imageBlob: Blob, userId: string = "anonymous"): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append("file", imageBlob, "stoma_image.jpg");
-  formData.append("user_id", userId);
+  formData.append("user_id", userId); //
 
   const response = await fetch(`${API_BASE_URL}/upload`, {
     method: "POST",
@@ -49,7 +49,7 @@ export async function uploadImage(imageBlob: Blob, userId: string = "anonymous")
 export async function startQuestionnaire(
   stage: string,
   aiClass: string,
-  selectedIndex?: number
+  selectedIndex?: number,
 ): Promise<QuestionResponse> {
   const body: Record<string, unknown> = {
     stage,
@@ -77,7 +77,7 @@ export async function startQuestionnaire(
 
 export async function fetchDiagnosisHistory(): Promise<DiagnosisRecord[]> {
   const response = await fetch(`${API_BASE_URL}/history`);
-  
+
   if (!response.ok) {
     throw new Error("Failed to fetch history");
   }
