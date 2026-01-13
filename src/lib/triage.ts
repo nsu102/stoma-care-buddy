@@ -56,7 +56,7 @@ export type TriageStep = Question | FinalResult | RetryResult | CameraRequest;
 
 export const QUESTIONS: Record<string, { text: string; options: string[] }> = {
   // 응급 질문 (E_Q1 ~ E_Q4)
-  E_Q1: { text: "현재 피가 멈추지 않고 계속 흐르나요?", options: ["예 (응급)", "아니요"] },
+  E_Q1: { text: "현재 피가 멈추지 않고 계속 흐르나요?", options: ["예", "아니요"] },
   E_Q2: { text: "24시간 이상 가스/대변 배출이 없고 복통/구토가 있나요?", options: ["예", "아니요"] },
   E_Q3: { text: "장루 색깔이 검게/보라색으로 변했거나 창백해졌나요?", options: ["예", "아니요"] },
   E_Q4: { text: "장루가 길게 튀어나와 아프거나 피부 사이가 벌어졌나요?", options: ["예", "아니요"] },
