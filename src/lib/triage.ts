@@ -62,7 +62,14 @@ export const QUESTIONS: Record<string, { text: string; options: string[] }> = {
   E_Q4: { text: "장루가 길게 튀어나와 색이 변했고 장루가 아픈가요?", options: ["예", "아니요"] },
 
   // 클래스 1: 정상/창백함
-  C1_Q1: { text: "장루와 주변 피부 색깔이 어떤가요?", options: ["장루 색깔 자체가 하얗거나 창백하게 변했어요", "장루는 빨간데, 주변 피부만 하얗게 불어 터졌거나 쭈글쭈글해요", "색깔은 평소처럼 선홍색이고 건강해보여요"] },
+  C1_Q1: {
+    text: "장루와 주변 피부 색깔이 어떤가요?",
+    options: [
+      "장루 색깔 자체가 하얗거나 창백하게 변했어요",
+      "장루는 빨간데, 주변 피부만 하얗게 불어 터졌거나 쭈글쭈글해요",
+      "색깔은 평소처럼 선홍색이고 건강해보여요",
+    ],
+  },
   C1_Q2: { text: "대변이 가늘게 나오거나 통증이 있나요?", options: ["예", "아니요"] },
 
   // 클래스 2: 피부염/발적
@@ -70,18 +77,41 @@ export const QUESTIONS: Record<string, { text: string; options: string[] }> = {
   C2_Q2: { text: "최근 장루를 부딪히거나 눌린 적 있나요?", options: ["예", "아니요"] },
   C2_Q2_SUB: { text: "통증은 어떤가요?", options: ["욱신거림/매끈함", "스치면 극심한 통증"] },
   C2_Q3: { text: "붉은 부위 질감/시기가 어떤가요?", options: ["쭈글쭈글/축축함", "오래된 자국", "최근/따가움"] },
-  C2_Q4: { text: "붉은 발진 외 특징이 있나요?", options: ["하얀 모래알", "은백색 비늘", "붉은 살점", "좁쌀/가려움", "장루판 모양", "두꺼운 피부(사마귀)", "없음"] },
-  C2_Q5: { text: "평소 관리 상태가 어떤가요?", options: ["대변이 자주 샘(자극성)", "뗄 때 아픔(기계적)", "털구멍 뾰루지(모낭염)", "잘 모르겠음"] },
-  C2_SACS: { text: "현재 피부 상태의 심각도를 골라주세요.", options: ["빨갛기만 함 (L1)", "껍질이 벗겨짐 (L2)", "깊게 파이거나 보라색 (L3)"] },
+  C2_Q4: {
+    text: "붉은 발진 외 특징이 있나요?",
+    options: ["하얀 모래알", "은백색 비늘", "붉은 살점", "좁쌀/가려움", "장루판 모양", "두꺼운 피부(사마귀)", "없음"],
+  },
+  C2_Q5: {
+    text: "평소 관리 상태가 어떤가요?",
+    options: ["대변이 자주 샘(자극성)", "뗄 때 아픔(기계적)", "털구멍 뾰루지(모낭염)", "잘 모르겠음"],
+  },
+  C2_SACS: {
+    text: "현재 피부 상태의 심각도를 골라주세요.",
+    options: ["빨갛기만 함 (L1)", "껍질이 벗겨짐 (L2)", "깊게 파이거나 보라색 (L3)"],
+  },
 
   // 클래스 3: 혈류 및 변색
-  C3_Q1: { text: "변색 부위 특징을 골라주세요.", options: ["그림자", "닦으면 피 나옴", "변비약 복용", "오래된 흉터", "없음(이상함)"] },
+  C3_Q1: {
+    text: "변색 부위 특징을 골라주세요.",
+    options: ["그림자", "닦으면 피 나옴", "변비약 복용", "오래된 흉터", "없음(이상함)"],
+  },
   C3_Q2: { text: "부딪히거나 다친 적 있나요?", options: ["예", "아니요"] },
   C3_Q2_SUB: { text: "통증과 감각은 어떤가요?", options: ["욱신거리는 멍", "스치면 극심함", "차가움/감각없음"] },
-  C3_Q3: { text: "모양과 통증을 설명해주세요.", options: ["지렁이 혈관", "보라색 테두리+통증", "통증 없음/검게 마름", "해당 없음"] },
+  C3_Q3: {
+    text: "모양과 통증을 설명해주세요.",
+    options: ["지렁이 혈관", "보라색 테두리+통증", "통증 없음/검게 마름", "해당 없음"],
+  },
 
   // 공통 마무리 질문
-  COMMON_Q1: { text: "[마지막] 장루의 모양이나 높이가 평소와 다른가요?", options: ["장루가 평소보다 길게(코끼리 코처럼) 튀어나왔어요", "기침할 때 장루 주변 피부(배)가 둥글게 불룩 솟아올라요", "기침 시 솟음(탈장)", "평소와 같음"] }
+  COMMON_Q1: {
+    text: "[마지막] 장루의 모양이나 높이가 평소와 다른가요?",
+    options: [
+      "장루가 평소보다 길게(코끼리 코처럼) 튀어나왔어요",
+      "장루 끝이 피부와 높이가 비슷하거나 움푹 들어가있어요",
+      "기침할 때 장루 주변 피부(배)가 둥글게 불룩 솟아올라요",
+      "평소와 같아요",
+    ],
+  },
 };
 
 // ==========================================
@@ -95,45 +125,204 @@ interface TreatmentInfo {
 }
 
 export const TREATMENT_DATA: Record<string, TreatmentInfo> = {
-  "활동성 출혈": { description: "지혈되지 않는 활동성 출혈이 감지되었습니다.", advice: "출혈량이 많습니다. 깨끗한 거즈나 수건으로 부위를 압박하십시오.", emergency_alert: "즉시 응급실로 가십시오!" },
-  "장폐색": { description: "장이 막힌 '장폐색'이 의심됩니다.", advice: "따뜻한 물을 마시고, 가벼운 걷기나 시계 방향 마사지를 하세요. 음식 섭취를 중단하십시오.", emergency_alert: "복통이 심해지거나 구토가 동반되면 즉시 응급실로 이동하십시오." },
-  "급성 괴사": { description: "조직이 죽어가는 '장루 괴사'가 의심됩니다.", advice: "자가 관리로 회복될 수 없습니다. 괴사 부위를 제거하는 수술적 처치가 필요할 수 있습니다.", emergency_alert: "장루 전체가 썩어 들어갈 위험이 있습니다. 지금 즉시 응급실로 가십시오!" },
-  "괴사": { description: "조직이 죽어가는 '장루 괴사'가 의심됩니다.", advice: "자가 관리로 회복될 수 없습니다. 괴사 부위를 제거하는 수술적 처치가 필요할 수 있습니다.", emergency_alert: "장루 전체가 썩어 들어갈 위험이 있습니다. 지금 즉시 응급실로 가십시오!" },
-  "감돈된 장루 탈출": { description: "장루가 심각하게 탈출되어 혈류가 차단될 위험이 있습니다.", advice: "억지로 밀어 넣지 마시고 젖은 거즈로 덮으십시오.", emergency_alert: "장루 색이 변하고 있습니다. 즉시 응급실로 가십시오!" },
-  "괴저성 농피증": { description: "자가면역 질환인 '괴저성 농피증'이 강력히 의심됩니다.", advice: "절대 상처를 뜯거나 소독약으로 세게 닦지 마십시오. 일반 치료로 낫지 않으므로 병원 방문이 필요합니다.", emergency_alert: "통증이 심하고 위험한 질환입니다. 즉시 병원으로 가십시오." },
-  "허혈": { description: "혈액 공급 부족으로 인한 '허혈'이 의심됩니다.", advice: "자가 치료가 불가능한 상태입니다. 수술 부위 혈관 문제일 수 있습니다.", emergency_alert: "장루 괴사로 진행될 수 있으니 지금 즉시 병원(응급실)에 연락하세요." },
-  "장루 정맥류": { description: "혈관이 확장된 '장루 정맥류'가 의심됩니다.", advice: "절대 문지르지 마십시오. 작은 자극에도 대량 출혈이 발생할 수 있습니다.", emergency_alert: "출혈이 시작되어 멈추지 않으면 즉시 응급실로 가야 합니다." },
-  "장루 탈출": { description: "장루가 평소보다 길게 튀어나온 '장루 탈출'이 의심됩니다.", advice: "누워서 휴식을 취하면 들어갈 수 있습니다. 복압이 오르는 운동을 피하고 넉넉한 주머니를 사용하세요.", emergency_alert: "색이 검게 변하거나 통증이 심하면 즉시 응급실로 가십시오." },
-  "장루 함몰": { description: "피부 안쪽으로 들어간 '함몰 장루'가 의심됩니다.", advice: "배설물이 새기 쉬워 피부 손상이 유발됩니다. 함몰형 볼록판을 사용하면 도움이 됩니다.", emergency_alert: null },
-  "장루 탈장": { description: "장루 주변이 불룩하게 솟은 '장루 탈장'이 의심됩니다.", advice: "활동 시 '장루용 복대'를 착용하여 복부를 지지하십시오. 체중 조절과 변비 예방이 중요합니다.", emergency_alert: "갑작스러운 극심한 복통이나 구토가 동반되면 '장 감돈'일 수 있습니다. 즉시 응급실로 가십시오." },
-  "장루 협착": { description: "배설구가 좁아지는 '장루 협착'이 의심됩니다.", advice: "변을 묽게 하기 위해 수분 섭취를 늘리십시오. 구멍을 넓히는 시술이 필요할 수 있으니 병원을 예약하십시오.", emergency_alert: null },
-  "상세 불명의 발적": { description: "원인을 알 수 없는 붉은 발진이 지속됩니다.", advice: "정확한 진단과 치료를 위해 가까운 병원(장루 간호사)을 방문하십시오.", emergency_alert: null },
-  "자극성 피부염 [L1]": { description: "배설물 누수로 인해 피부가 붉어진 상태(L1)입니다.", advice: "[관리법] 깨끗이 씻고 말린 후, '피부 보호 필름(Skin Barrier Film)'을 발라주세요. 구멍 크기를 장루에 맞게 줄이십시오.", emergency_alert: null },
-  "자극성 피부염 [L2]": { description: "피부 껍질이 벗겨지고 진물이 나는 상태(L2)입니다.", advice: "[관리법] '파우더 뿌리기 → 털기 → 필름 바르기' 과정을 2~3회 반복하여 인공 보호막(Crusting)을 만드십시오.", emergency_alert: null },
-  "자극성 피부염 [L3]": { description: "피부가 깊게 파이거나 궤양이 생긴 상태(L3)입니다.", advice: "[병원 방문] 자가 치료가 위험할 수 있습니다. 상처가 깊으므로 병원을 방문하여 전문적인 처치를 받으십시오.", emergency_alert: null },
-  "기계적 손상 [L1]": { description: "장루판 제거 시 자극으로 피부가 붉어진 상태(L1)입니다.", advice: "[관리법] 장루판 제거 시 반드시 '제거제(Remover)'를 사용하여 부드럽게 떼어내십시오. 보호 필름을 사용하십시오.", emergency_alert: null },
-  "기계적 손상 [L2]": { description: "피부가 찢어져 진물이 나는 상태(L2)입니다.", advice: "[관리법] 상처 부위에 파우더를 뿌리고 보호 필름을 덧발라 보호막을 만들어주십시오. 제거제를 꼭 사용하십시오.", emergency_alert: null },
-  "기계적 손상 [L3]": { description: "피부가 깊게 찢어진 심각한 상처(L3)입니다.", advice: "[병원 방문] 상처 봉합이나 전문 드레싱이 필요할 수 있습니다. 병원을 방문하십시오.", emergency_alert: null },
-  "모낭염 [L1]": { description: "털구멍 세균 감염인 '모낭염'이 의심됩니다.", advice: "[관리법] 항생제 연고나 파우더를 사용하십시오. 면도 시 가위나 전기 클리퍼를 사용하여 자극을 줄이십시오.", emergency_alert: null },
-  "모낭염 [L2]": { description: "모낭염이 진행되어 고름이 차는 상태입니다.", advice: "항생제 연고를 바르고 절대 짜지 마십시오. 심해지면 병원을 방문하세요.", emergency_alert: null },
-  "모낭염 [L3]": { description: "모낭염이 심하게 악화된 상태입니다.", advice: "[병원 방문] 경구용 항생제가 필요할 수 있습니다. 병원을 방문하십시오.", emergency_alert: null },
-  "짓무름": { description: "습기로 인해 피부가 하얗게 붓는 '짓무름'이 의심됩니다.", advice: "핵심은 '건조'입니다. 드라이기(찬바람)로 말리고 파우더와 보호 필름을 사용하여 뽀송하게 만드십시오.", emergency_alert: null },
-  "모낭염": { description: "털구멍 세균 감염인 '모낭염'이 의심됩니다.", advice: "항생제 연고나 파우더를 사용하십시오. 면도 시 가위나 전기 클리퍼를 사용하여 자극을 줄이십시오.", emergency_alert: null },
-  "곰팡이 감염": { description: "곰팡이균에 의한 '진균 감염'이 의심됩니다.", advice: "일반 파우더는 효과가 없습니다. 항진균제 처방을 위해 약국이나 병원을 방문하십시오.", emergency_alert: null },
-  "알레르기": { description: "제품 성분에 반응하는 '알레르기 피부염'이 의심됩니다.", advice: "사용 중인 장루판 브랜드를 변경하십시오. 심하면 스테로이드 로션 처방이 필요합니다.", emergency_alert: null },
-  "건선": { description: "자가면역 질환인 '장루 주위 건선'이 의심됩니다.", advice: "전문적인 치료가 필요하므로 병원을 방문하십시오.", emergency_alert: null },
-  "요산 결정": { description: "소변 성분이 굳은 '요산 결정'이 의심됩니다.", advice: "식초와 물을 1:1로 섞어 거즈에 적셔 10분간 올려두면 녹습니다. 이후 물로 씻어내세요.", emergency_alert: null },
-  "육아종": { description: "붉은 살점이 덧자란 '육아종'이 의심됩니다.", advice: "출혈이 잦으니 문지르지 마시고 피부를 말려주세요. 심하면 병원에서 제거해야 합니다.", emergency_alert: null },
-  "기성 사마귀 병변": { description: "만성 자극으로 피부가 두꺼워진 '기성 사마귀 병변'이 의심됩니다.", advice: "지속적인 배설물 노출이 원인입니다. 장루판 구멍을 장루 크기에 딱 맞게 줄이십시오.", emergency_alert: null },
-  "점막피부 분리": { description: "장루와 피부 사이가 벌어진 상태입니다.", advice: "틈새를 장루 파우더나 연고로 메워서 평평하게 만든 후 장루판을 붙이십시오.", emergency_alert: null },
-  "단순 타박상": { description: "외부 충격에 의한 '단순 타박상'으로 보입니다.", advice: "특별한 치료 없이 자연 치유됩니다. 장루판 교체 시 부드럽게 다뤄주세요.", emergency_alert: null },
-  "단순 타박상 (진한 멍)": { description: "외부 충격에 의한 '단순 타박상(진한 멍)'으로 보입니다.", advice: "특별한 치료 없이 자연 치유됩니다. 장루판 교체 시 부드럽게 다뤄주세요.", emergency_alert: null },
-  "외상성 궤양": { description: "외상으로 인해 깊은 상처(궤양)가 발생했습니다.", advice: "자가 치료가 어려울 수 있습니다. 병원을 방문하여 상처 소독을 받으십시오.", emergency_alert: null },
-  "대장흑색증": { description: "변비약 복용으로 인한 '대장흑색증'이 의심됩니다.", advice: "단순 색소 침착으로 건강에 해롭지 않습니다. 특별한 치료가 필요 없습니다.", emergency_alert: null },
-  "붉은 흉터": { description: "과거 상처의 흔적(흉터)입니다.", advice: "장루와 피부가 건강합니다. 주기적으로 관리해주세요.", emergency_alert: null },
-  "흉터/색소침착": { description: "수술이나 과거 상처로 인한 색소침착입니다.", advice: "현재 문제가 없는 상태입니다. 평소대로 관리하십시오.", emergency_alert: null },
-  "정상": { description: "장루와 피부가 건강합니다.", advice: "현재 상태가 아주 좋습니다. 주기적으로 관리해주세요!", emergency_alert: null },
-  "진단 불가 (AI 분석 오류)": { description: "AI 분석 결과를 확인할 수 없습니다.", advice: "다시 촬영하거나 병원을 방문하여 전문가의 진단을 받으십시오.", emergency_alert: null }
+  "활동성 출혈": {
+    description: "지혈되지 않는 활동성 출혈이 감지되었습니다.",
+    advice: "출혈량이 많습니다. 깨끗한 거즈나 수건으로 부위를 압박하십시오.",
+    emergency_alert: "즉시 응급실로 가십시오!",
+  },
+  장폐색: {
+    description: "장이 막힌 '장폐색'이 의심됩니다.",
+    advice: "따뜻한 물을 마시고, 가벼운 걷기나 시계 방향 마사지를 하세요. 음식 섭취를 중단하십시오.",
+    emergency_alert: "복통이 심해지거나 구토가 동반되면 즉시 응급실로 이동하십시오.",
+  },
+  "급성 괴사": {
+    description: "조직이 죽어가는 '장루 괴사'가 의심됩니다.",
+    advice: "자가 관리로 회복될 수 없습니다. 괴사 부위를 제거하는 수술적 처치가 필요할 수 있습니다.",
+    emergency_alert: "장루 전체가 썩어 들어갈 위험이 있습니다. 지금 즉시 응급실로 가십시오!",
+  },
+  괴사: {
+    description: "조직이 죽어가는 '장루 괴사'가 의심됩니다.",
+    advice: "자가 관리로 회복될 수 없습니다. 괴사 부위를 제거하는 수술적 처치가 필요할 수 있습니다.",
+    emergency_alert: "장루 전체가 썩어 들어갈 위험이 있습니다. 지금 즉시 응급실로 가십시오!",
+  },
+  "감돈된 장루 탈출": {
+    description: "장루가 심각하게 탈출되어 혈류가 차단될 위험이 있습니다.",
+    advice: "억지로 밀어 넣지 마시고 젖은 거즈로 덮으십시오.",
+    emergency_alert: "장루 색이 변하고 있습니다. 즉시 응급실로 가십시오!",
+  },
+  "괴저성 농피증": {
+    description: "자가면역 질환인 '괴저성 농피증'이 강력히 의심됩니다.",
+    advice: "절대 상처를 뜯거나 소독약으로 세게 닦지 마십시오. 일반 치료로 낫지 않으므로 병원 방문이 필요합니다.",
+    emergency_alert: "통증이 심하고 위험한 질환입니다. 즉시 병원으로 가십시오.",
+  },
+  허혈: {
+    description: "혈액 공급 부족으로 인한 '허혈'이 의심됩니다.",
+    advice: "자가 치료가 불가능한 상태입니다. 수술 부위 혈관 문제일 수 있습니다.",
+    emergency_alert: "장루 괴사로 진행될 수 있으니 지금 즉시 병원(응급실)에 연락하세요.",
+  },
+  "장루 정맥류": {
+    description: "혈관이 확장된 '장루 정맥류'가 의심됩니다.",
+    advice: "절대 문지르지 마십시오. 작은 자극에도 대량 출혈이 발생할 수 있습니다.",
+    emergency_alert: "출혈이 시작되어 멈추지 않으면 즉시 응급실로 가야 합니다.",
+  },
+  "장루 탈출": {
+    description: "장루가 평소보다 길게 튀어나온 '장루 탈출'이 의심됩니다.",
+    advice: "누워서 휴식을 취하면 들어갈 수 있습니다. 복압이 오르는 운동을 피하고 넉넉한 주머니를 사용하세요.",
+    emergency_alert: "색이 검게 변하거나 통증이 심하면 즉시 응급실로 가십시오.",
+  },
+  "장루 함몰": {
+    description: "피부 안쪽으로 들어간 '함몰 장루'가 의심됩니다.",
+    advice: "배설물이 새기 쉬워 피부 손상이 유발됩니다. 함몰형 볼록판을 사용하면 도움이 됩니다.",
+    emergency_alert: null,
+  },
+  "장루 탈장": {
+    description: "장루 주변이 불룩하게 솟은 '장루 탈장'이 의심됩니다.",
+    advice: "활동 시 '장루용 복대'를 착용하여 복부를 지지하십시오. 체중 조절과 변비 예방이 중요합니다.",
+    emergency_alert: "갑작스러운 극심한 복통이나 구토가 동반되면 '장 감돈'일 수 있습니다. 즉시 응급실로 가십시오.",
+  },
+  "장루 협착": {
+    description: "배설구가 좁아지는 '장루 협착'이 의심됩니다.",
+    advice: "변을 묽게 하기 위해 수분 섭취를 늘리십시오. 구멍을 넓히는 시술이 필요할 수 있으니 병원을 예약하십시오.",
+    emergency_alert: null,
+  },
+  "상세 불명의 발적": {
+    description: "원인을 알 수 없는 붉은 발진이 지속됩니다.",
+    advice: "정확한 진단과 치료를 위해 가까운 병원(장루 간호사)을 방문하십시오.",
+    emergency_alert: null,
+  },
+  "자극성 피부염 [L1]": {
+    description: "배설물 누수로 인해 피부가 붉어진 상태(L1)입니다.",
+    advice:
+      "[관리법] 깨끗이 씻고 말린 후, '피부 보호 필름(Skin Barrier Film)'을 발라주세요. 구멍 크기를 장루에 맞게 줄이십시오.",
+    emergency_alert: null,
+  },
+  "자극성 피부염 [L2]": {
+    description: "피부 껍질이 벗겨지고 진물이 나는 상태(L2)입니다.",
+    advice: "[관리법] '파우더 뿌리기 → 털기 → 필름 바르기' 과정을 2~3회 반복하여 인공 보호막(Crusting)을 만드십시오.",
+    emergency_alert: null,
+  },
+  "자극성 피부염 [L3]": {
+    description: "피부가 깊게 파이거나 궤양이 생긴 상태(L3)입니다.",
+    advice: "[병원 방문] 자가 치료가 위험할 수 있습니다. 상처가 깊으므로 병원을 방문하여 전문적인 처치를 받으십시오.",
+    emergency_alert: null,
+  },
+  "기계적 손상 [L1]": {
+    description: "장루판 제거 시 자극으로 피부가 붉어진 상태(L1)입니다.",
+    advice:
+      "[관리법] 장루판 제거 시 반드시 '제거제(Remover)'를 사용하여 부드럽게 떼어내십시오. 보호 필름을 사용하십시오.",
+    emergency_alert: null,
+  },
+  "기계적 손상 [L2]": {
+    description: "피부가 찢어져 진물이 나는 상태(L2)입니다.",
+    advice:
+      "[관리법] 상처 부위에 파우더를 뿌리고 보호 필름을 덧발라 보호막을 만들어주십시오. 제거제를 꼭 사용하십시오.",
+    emergency_alert: null,
+  },
+  "기계적 손상 [L3]": {
+    description: "피부가 깊게 찢어진 심각한 상처(L3)입니다.",
+    advice: "[병원 방문] 상처 봉합이나 전문 드레싱이 필요할 수 있습니다. 병원을 방문하십시오.",
+    emergency_alert: null,
+  },
+  "모낭염 [L1]": {
+    description: "털구멍 세균 감염인 '모낭염'이 의심됩니다.",
+    advice: "[관리법] 항생제 연고나 파우더를 사용하십시오. 면도 시 가위나 전기 클리퍼를 사용하여 자극을 줄이십시오.",
+    emergency_alert: null,
+  },
+  "모낭염 [L2]": {
+    description: "모낭염이 진행되어 고름이 차는 상태입니다.",
+    advice: "항생제 연고를 바르고 절대 짜지 마십시오. 심해지면 병원을 방문하세요.",
+    emergency_alert: null,
+  },
+  "모낭염 [L3]": {
+    description: "모낭염이 심하게 악화된 상태입니다.",
+    advice: "[병원 방문] 경구용 항생제가 필요할 수 있습니다. 병원을 방문하십시오.",
+    emergency_alert: null,
+  },
+  짓무름: {
+    description: "습기로 인해 피부가 하얗게 붓는 '짓무름'이 의심됩니다.",
+    advice: "핵심은 '건조'입니다. 드라이기(찬바람)로 말리고 파우더와 보호 필름을 사용하여 뽀송하게 만드십시오.",
+    emergency_alert: null,
+  },
+  모낭염: {
+    description: "털구멍 세균 감염인 '모낭염'이 의심됩니다.",
+    advice: "항생제 연고나 파우더를 사용하십시오. 면도 시 가위나 전기 클리퍼를 사용하여 자극을 줄이십시오.",
+    emergency_alert: null,
+  },
+  "곰팡이 감염": {
+    description: "곰팡이균에 의한 '진균 감염'이 의심됩니다.",
+    advice: "일반 파우더는 효과가 없습니다. 항진균제 처방을 위해 약국이나 병원을 방문하십시오.",
+    emergency_alert: null,
+  },
+  알레르기: {
+    description: "제품 성분에 반응하는 '알레르기 피부염'이 의심됩니다.",
+    advice: "사용 중인 장루판 브랜드를 변경하십시오. 심하면 스테로이드 로션 처방이 필요합니다.",
+    emergency_alert: null,
+  },
+  건선: {
+    description: "자가면역 질환인 '장루 주위 건선'이 의심됩니다.",
+    advice: "전문적인 치료가 필요하므로 병원을 방문하십시오.",
+    emergency_alert: null,
+  },
+  "요산 결정": {
+    description: "소변 성분이 굳은 '요산 결정'이 의심됩니다.",
+    advice: "식초와 물을 1:1로 섞어 거즈에 적셔 10분간 올려두면 녹습니다. 이후 물로 씻어내세요.",
+    emergency_alert: null,
+  },
+  육아종: {
+    description: "붉은 살점이 덧자란 '육아종'이 의심됩니다.",
+    advice: "출혈이 잦으니 문지르지 마시고 피부를 말려주세요. 심하면 병원에서 제거해야 합니다.",
+    emergency_alert: null,
+  },
+  "기성 사마귀 병변": {
+    description: "만성 자극으로 피부가 두꺼워진 '기성 사마귀 병변'이 의심됩니다.",
+    advice: "지속적인 배설물 노출이 원인입니다. 장루판 구멍을 장루 크기에 딱 맞게 줄이십시오.",
+    emergency_alert: null,
+  },
+  "점막피부 분리": {
+    description: "장루와 피부 사이가 벌어진 상태입니다.",
+    advice: "틈새를 장루 파우더나 연고로 메워서 평평하게 만든 후 장루판을 붙이십시오.",
+    emergency_alert: null,
+  },
+  "단순 타박상": {
+    description: "외부 충격에 의한 '단순 타박상'으로 보입니다.",
+    advice: "특별한 치료 없이 자연 치유됩니다. 장루판 교체 시 부드럽게 다뤄주세요.",
+    emergency_alert: null,
+  },
+  "단순 타박상 (진한 멍)": {
+    description: "외부 충격에 의한 '단순 타박상(진한 멍)'으로 보입니다.",
+    advice: "특별한 치료 없이 자연 치유됩니다. 장루판 교체 시 부드럽게 다뤄주세요.",
+    emergency_alert: null,
+  },
+  "외상성 궤양": {
+    description: "외상으로 인해 깊은 상처(궤양)가 발생했습니다.",
+    advice: "자가 치료가 어려울 수 있습니다. 병원을 방문하여 상처 소독을 받으십시오.",
+    emergency_alert: null,
+  },
+  대장흑색증: {
+    description: "변비약 복용으로 인한 '대장흑색증'이 의심됩니다.",
+    advice: "단순 색소 침착으로 건강에 해롭지 않습니다. 특별한 치료가 필요 없습니다.",
+    emergency_alert: null,
+  },
+  "붉은 흉터": {
+    description: "과거 상처의 흔적(흉터)입니다.",
+    advice: "장루와 피부가 건강합니다. 주기적으로 관리해주세요.",
+    emergency_alert: null,
+  },
+  "흉터/색소침착": {
+    description: "수술이나 과거 상처로 인한 색소침착입니다.",
+    advice: "현재 문제가 없는 상태입니다. 평소대로 관리하십시오.",
+    emergency_alert: null,
+  },
+  정상: {
+    description: "장루와 피부가 건강합니다.",
+    advice: "현재 상태가 아주 좋습니다. 주기적으로 관리해주세요!",
+    emergency_alert: null,
+  },
+  "진단 불가 (AI 분석 오류)": {
+    description: "AI 분석 결과를 확인할 수 없습니다.",
+    advice: "다시 촬영하거나 병원을 방문하여 전문가의 진단을 받으십시오.",
+    emergency_alert: null,
+  },
 };
 
 // ==========================================
@@ -147,7 +336,7 @@ function finalResult(diagnosisText: string): FinalResult {
   const foundDescriptions: string[] = [];
   const foundAdvices: string[] = [];
   const foundAlerts: string[] = [];
-  
+
   // 0: 정상(초록), 1: 주의(노랑), 2: 위험(빨강)
   let maxRiskLevel: RiskLevel = 0;
 
@@ -164,7 +353,7 @@ function finalResult(diagnosisText: string): FinalResult {
     if (diagnosisText.includes(keyword)) {
       foundDescriptions.push(info.description);
       foundAdvices.push(info.advice);
-      
+
       // 위험도 로직
       if (info.emergency_alert) {
         // 응급 알림이 있으면 무조건 '위험(2)'
@@ -172,8 +361,8 @@ function finalResult(diagnosisText: string): FinalResult {
         maxRiskLevel = 2;
       } else if (maxRiskLevel < 2) {
         // 응급은 아니지만, '정상'이나 '흉터' 같은 안전한 게 아니면 '주의(1)'
-        const isSafe = safeKeywords.some(safe => keyword.includes(safe));
-        
+        const isSafe = safeKeywords.some((safe) => keyword.includes(safe));
+
         if (!isSafe && maxRiskLevel < 1) {
           maxRiskLevel = 1;
         }
@@ -203,7 +392,7 @@ function finalResult(diagnosisText: string): FinalResult {
     description: finalDesc,
     advice: finalAdvice,
     emergency_alert: finalAlert,
-    risk_level: maxRiskLevel
+    risk_level: maxRiskLevel,
   };
 }
 
@@ -215,7 +404,7 @@ function retryResult(message: string): RetryResult {
     type: "retry",
     diagnosis: message,
     action: "camera",
-    delete_image: true
+    delete_image: true,
   };
 }
 
@@ -228,7 +417,7 @@ function toCommon(diagnosisSoFar: string): Question {
     type: "question",
     text: QUESTIONS["COMMON_Q1"].text,
     options: QUESTIONS["COMMON_Q1"].options,
-    temp_diagnosis: diagnosisSoFar
+    temp_diagnosis: diagnosisSoFar,
   };
 }
 
@@ -243,7 +432,7 @@ function createQuestion(id: string, tempDiagnosis?: string): Question {
       id: "E_Q1",
       type: "question",
       text: QUESTIONS["E_Q1"].text,
-      options: QUESTIONS["E_Q1"].options
+      options: QUESTIONS["E_Q1"].options,
     };
   }
   return {
@@ -251,7 +440,7 @@ function createQuestion(id: string, tempDiagnosis?: string): Question {
     type: "question",
     text: q.text,
     options: q.options,
-    temp_diagnosis: tempDiagnosis
+    temp_diagnosis: tempDiagnosis,
   };
 }
 
@@ -271,9 +460,8 @@ export function getNextStep(
   currentStepId: string,
   answerIndex: number,
   aiClass: AIClass,
-  savedDiagnosis: string = ""
+  savedDiagnosis: string = "",
 ): TriageStep {
-
   // ----------------------------------------------------
   // 0. 시작 (START) -> 즉시 사진 촬영 요청
   // ----------------------------------------------------
@@ -282,7 +470,7 @@ export function getNextStep(
       type: "camera_request",
       message: "진단을 시작합니다. 먼저 장루 상태를 확인할 수 있도록 사진을 촬영해주세요.",
       action: "open_camera",
-      next_step_id: "E_Q1"
+      next_step_id: "E_Q1",
     };
   }
 
