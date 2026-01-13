@@ -1,29 +1,29 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/AppHeader";
 import { Calendar } from "@/components/ui/calendar";
-import { ChevronLeft, ChevronRight, Camera, AlertCircle, CheckCircle } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
+import { Camera, ClipboardList, FileText, ChevronRight } from "lucide-react";
+import { format, isSameDay } from "date-fns";
 import { ko } from "date-fns/locale";
 
 interface DayRecord {
   date: Date;
   hasPhoto: boolean;
+  hasQuestionnaire: boolean;
+  hasMemo: boolean;
   status: "good" | "warning" | "danger";
 }
 
 // Mock data for demonstration
 const mockRecords: DayRecord[] = [
-  { date: new Date(2026, 0, 10), hasPhoto: true, status: "good" },
-  { date: new Date(2026, 0, 11), hasPhoto: true, status: "good" },
-  { date: new Date(2026, 0, 12), hasPhoto: true, status: "warning" },
-  { date: new Date(2026, 0, 13), hasPhoto: true, status: "good" },
+  { date: new Date(2026, 0, 10), hasPhoto: true, hasQuestionnaire: true, hasMemo: false, status: "good" },
+  { date: new Date(2026, 0, 11), hasPhoto: true, hasQuestionnaire: true, hasMemo: true, status: "good" },
+  { date: new Date(2026, 0, 12), hasPhoto: true, hasQuestionnaire: false, hasMemo: true, status: "warning" },
+  { date: new Date(2026, 0, 13), hasPhoto: true, hasQuestionnaire: true, hasMemo: false, status: "good" },
 ];
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [viewMode, setViewMode] = useState<"month" | "week">("month");
 
   const getRecordForDate = (date: Date) => {
     return mockRecords.find(r => isSameDay(r.date, date));
@@ -40,40 +40,11 @@ export default function CalendarPage() {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "good": return "양호";
-      case "warning": return "주의";
-      case "danger": return "위험";
-      default: return "기록 없음";
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background pb-20">
       <AppHeader title="캘린더" />
       
       <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-        {/* View Toggle */}
-        <div className="flex gap-2 p-1 bg-muted rounded-lg">
-          <Button
-            variant={viewMode === "month" ? "default" : "ghost"}
-            size="sm"
-            className="flex-1"
-            onClick={() => setViewMode("month")}
-          >
-            월별
-          </Button>
-          <Button
-            variant={viewMode === "week" ? "default" : "ghost"}
-            size="sm"
-            className="flex-1"
-            onClick={() => setViewMode("week")}
-          >
-            주별
-          </Button>
-        </div>
-
         {/* Calendar */}
         <Card className="p-4">
           <Calendar
@@ -108,74 +79,89 @@ export default function CalendarPage() {
           />
         </Card>
 
-        {/* Selected Date Info */}
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-foreground">
-              {format(selectedDate, "M월 d일 EEEE", { locale: ko })}
-            </h3>
-            {selectedRecord && (
-              <span className={`px-3 py-1 rounded-full text-xs font-medium text-primary-foreground ${getStatusColor(selectedRecord.status)}`}>
-                {getStatusText(selectedRecord.status)}
-              </span>
-            )}
-          </div>
+        {/* Selected Date Header */}
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg text-foreground">
+            {format(selectedDate, "M월 d일 EEEE", { locale: ko })}
+          </h3>
+        </div>
 
-          {selectedRecord ? (
-            <div className="space-y-4">
-              {/* Photo placeholder */}
-              <div className="aspect-video bg-muted rounded-xl flex items-center justify-center">
-                <Camera className="h-10 w-10 text-muted-foreground" />
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm">
-                {selectedRecord.status === "good" ? (
-                  <CheckCircle className="h-4 w-4 text-success" />
-                ) : (
-                  <AlertCircle className="h-4 w-4 text-warning" />
-                )}
-                <span className="text-muted-foreground">
-                  AI 분석 결과: {getStatusText(selectedRecord.status)}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground text-sm">
-                이 날짜의 기록이 없습니다
-              </p>
-              <Button variant="outline" size="sm" className="mt-4">
-                기록 추가하기
-              </Button>
-            </div>
-          )}
-        </Card>
-
-        {/* Recent Records */}
-        <div>
-          <h3 className="font-semibold text-foreground mb-3">최근 기록</h3>
-          <div className="space-y-2">
-            {mockRecords.slice().reverse().map((record, idx) => (
-              <Card 
-                key={idx} 
-                className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => setSelectedDate(record.date)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${getStatusColor(record.status)}`} />
-                    <span className="font-medium">
-                      {format(record.date, "M월 d일", { locale: ko })}
-                    </span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {getStatusText(record.status)}
-                  </span>
+        {/* Record Boxes */}
+        <div className="space-y-3">
+          {/* 장루 촬영 기록 */}
+          <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Camera className="h-5 w-5 text-primary" />
                 </div>
-              </Card>
-            ))}
-          </div>
+                <div>
+                  <h4 className="font-medium text-foreground">장루 촬영 기록</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedRecord?.hasPhoto ? "촬영 완료" : "기록 없음"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedRecord?.hasPhoto && (
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium text-primary-foreground ${getStatusColor(selectedRecord.status)}`}>
+                    {selectedRecord.status === "good" ? "양호" : selectedRecord.status === "warning" ? "주의" : "위험"}
+                  </span>
+                )}
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </div>
+          </Card>
+
+          {/* AI 문진 점검 기록 */}
+          <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+                  <ClipboardList className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground">AI 문진 점검 기록</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedRecord?.hasQuestionnaire ? "점검 완료" : "기록 없음"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedRecord?.hasQuestionnaire && (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                    완료
+                  </span>
+                )}
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </div>
+          </Card>
+
+          {/* 개인 메모 */}
+          <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground">개인 메모</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedRecord?.hasMemo ? "메모 있음" : "메모 없음"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedRecord?.hasMemo && (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                    1개
+                  </span>
+                )}
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
