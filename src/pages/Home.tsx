@@ -7,7 +7,16 @@ import { QuestionnaireStep } from "@/components/QuestionnaireStep";
 import { DiagnosisResult } from "@/components/DiagnosisResult";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { StepIndicator } from "@/components/StepIndicator";
-import { uploadImage, startQuestionnaire, type QuestionResponse } from "@/lib/api";
+import { uploadImage, saveDiagnosisResult } from "@/lib/api";
+import { 
+  getNextStep, 
+  startEmergencyQuestionnaire, 
+  getRiskLevelString,
+  type AIClass,
+  type Question,
+  type FinalResult,
+  type TriageStep
+} from "@/lib/triage";
 import { 
   Camera, 
   CheckCircle2, 
@@ -17,12 +26,12 @@ import {
   Calendar,
   FileText,
   Gift,
-  ChevronRight,
   Edit3,
-  Trash2
+  Trash2,
+  Bug
 } from "lucide-react";
 
-type HomeView = "main" | "camera" | "questionnaire" | "result";
+type HomeView = "main" | "camera" | "questionnaire" | "result" | "debug";
 
 const checklistItems = [
   { id: 1, label: "장루 주변 연고 바르기", date: "25/01/27", completed: true },
@@ -38,23 +47,33 @@ export default function Home() {
   // Diagnosis state
   const [correctedImageUrl, setCorrectedImageUrl] = useState<string | null>(null);
   const [brightnessMessage, setBrightnessMessage] = useState<string | null>(null);
-  const [aiClass, setAiClass] = useState<string>("");
-  const [currentStage, setCurrentStage] = useState<string>("START");
-  const [currentQuestion, setCurrentQuestion] = useState<QuestionResponse | null>(null);
-  const [finalResult, setFinalResult] = useState<QuestionResponse | null>(null);
+  const [aiClass, setAiClass] = useState<AIClass>(1);
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [savedDiagnosis, setSavedDiagnosis] = useState<string>("");
+  const [finalResult, setFinalResult] = useState<FinalResult | null>(null);
 
   const resetDiagnosis = useCallback(() => {
     setCorrectedImageUrl(null);
     setBrightnessMessage(null);
-    setAiClass("");
-    setCurrentStage("START");
+    setAiClass(1);
     setCurrentQuestion(null);
+    setSavedDiagnosis("");
     setFinalResult(null);
   }, []);
 
   const handleStartDiagnosis = useCallback(() => {
     resetDiagnosis();
     setView("camera");
+  }, [resetDiagnosis]);
+
+  // 디버그용: AI 클래스를 직접 선택하여 문진 시작
+  const handleDebugStart = useCallback((selectedClass: AIClass) => {
+    resetDiagnosis();
+    setAiClass(selectedClass);
+    // 응급 문진부터 시작
+    const firstQuestion = startEmergencyQuestionnaire();
+    setCurrentQuestion(firstQuestion);
+    setView("questionnaire");
   }, [resetDiagnosis]);
 
   const handleImageCapture = useCallback(async (imageBlob: Blob) => {
@@ -65,23 +84,22 @@ export default function Home() {
       const uploadResult = await uploadImage(imageBlob);
       setCorrectedImageUrl(uploadResult.corrected_image_url);
       setBrightnessMessage(uploadResult.brightness_message || null);
-      setAiClass(uploadResult.necrosis_class);
+      
+      // AI 클래스 설정 (1, 2, 3 중 하나)
+      const classNum = parseInt(uploadResult.necrosis_class) as AIClass;
+      setAiClass(classNum || 1);
 
       setLoadingMessage("문진 준비 중...");
-      const questionResult = await startQuestionnaire("START", uploadResult.necrosis_class);
       
-      if (questionResult.type === "question") {
-        setCurrentQuestion(questionResult);
-        setCurrentStage(questionResult.stage || "START");
-        setView("questionnaire");
-      } else if (questionResult.type === "result") {
-        setFinalResult(questionResult);
-        setView("result");
-      }
+      // 내부 문진 시스템으로 응급 문진 시작
+      const firstQuestion = startEmergencyQuestionnaire();
+      setCurrentQuestion(firstQuestion);
+      setView("questionnaire");
     } catch (error) {
       console.error("Error during image upload:", error);
-      alert("이미지 업로드 중 오류가 발생했습니다. 다시 시도해주세요.");
-      setView("main");
+      alert("서버 연결 실패. 디버그 모드로 진행합니다.");
+      // 서버 실패 시 디버그 모드로 전환
+      setView("debug");
     } finally {
       setIsLoading(false);
     }
@@ -94,18 +112,38 @@ export default function Home() {
       setIsLoading(true);
       setLoadingMessage("다음 질문 준비 중...");
 
-      const nextQuestion = await startQuestionnaire(
-        currentStage,
+      // 현재 질문의 temp_diagnosis가 있으면 저장
+      const currentDiagnosis = currentQuestion.temp_diagnosis || savedDiagnosis;
+      
+      // 다음 단계 가져오기
+      const nextStep = getNextStep(
+        currentQuestion.id,
+        selectedIndex,
         aiClass,
-        selectedIndex
+        currentDiagnosis
       );
 
-      if (nextQuestion.type === "question") {
-        setCurrentQuestion(nextQuestion);
-        setCurrentStage(nextQuestion.stage || currentStage);
-      } else if (nextQuestion.type === "result") {
-        setFinalResult(nextQuestion);
+      if (nextStep.type === "question") {
+        // 다음 질문으로 이동
+        setCurrentQuestion(nextStep as Question);
+        if ((nextStep as Question).temp_diagnosis) {
+          setSavedDiagnosis((nextStep as Question).temp_diagnosis!);
+        }
+      } else if (nextStep.type === "result") {
+        // 최종 결과
+        const result = nextStep as FinalResult;
+        setFinalResult(result);
         setView("result");
+        
+        // 서버에 결과 저장 (실패해도 계속 진행)
+        saveDiagnosisResult({
+          diagnosis: result.diagnosis,
+          description: result.description,
+          advice: result.advice,
+          risk_level: result.risk_level,
+          emergency_alert: result.emergency_alert,
+          corrected_image_url: correctedImageUrl || undefined,
+        });
       }
     } catch (error) {
       console.error("Error during questionnaire:", error);
@@ -113,7 +151,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentQuestion, currentStage, aiClass]);
+  }, [currentQuestion, aiClass, savedDiagnosis, correctedImageUrl]);
 
   const handleGoHome = useCallback(() => {
     resetDiagnosis();
@@ -131,6 +169,65 @@ export default function Home() {
       window.removeEventListener('openCamera', handleOpenCamera);
     };
   }, [handleStartDiagnosis]);
+
+  // Debug mode view - AI 클래스 선택 화면
+  if (view === "debug") {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="max-w-lg mx-auto px-4 py-6">
+          <div className="text-center mb-8">
+            <Bug className="h-12 w-12 text-warning mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground mb-2">디버그 모드</h1>
+            <p className="text-muted-foreground">
+              서버 연결 없이 문진을 테스트합니다.<br/>
+              AI 클래스를 선택해주세요.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <Card 
+              className="p-6 border-2 border-success/30 bg-success/5 cursor-pointer hover:border-success transition-colors"
+              onClick={() => handleDebugStart(1)}
+            >
+              <h3 className="text-lg font-bold text-success mb-2">클래스 1: 정상/창백함</h3>
+              <p className="text-sm text-muted-foreground">
+                장루 색상이 정상이거나 창백한 경우의 문진 흐름을 테스트합니다.
+              </p>
+            </Card>
+
+            <Card 
+              className="p-6 border-2 border-warning/30 bg-warning/5 cursor-pointer hover:border-warning transition-colors"
+              onClick={() => handleDebugStart(2)}
+            >
+              <h3 className="text-lg font-bold text-warning mb-2">클래스 2: 발적/염증</h3>
+              <p className="text-sm text-muted-foreground">
+                장루 주변에 발적이나 염증이 있는 경우의 문진 흐름을 테스트합니다.
+              </p>
+            </Card>
+
+            <Card 
+              className="p-6 border-2 border-destructive/30 bg-destructive/5 cursor-pointer hover:border-destructive transition-colors"
+              onClick={() => handleDebugStart(3)}
+            >
+              <h3 className="text-lg font-bold text-destructive mb-2">클래스 3: 변색/괴사</h3>
+              <p className="text-sm text-muted-foreground">
+                장루가 변색되었거나 괴사가 의심되는 경우의 문진 흐름을 테스트합니다.
+              </p>
+            </Card>
+          </div>
+
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full mt-6"
+            onClick={() => setView("main")}
+          >
+            돌아가기
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Camera view
   if (view === "camera") {
@@ -163,11 +260,11 @@ export default function Home() {
           )}
 
           <QuestionnaireStep
-            question={currentQuestion.question || ""}
-            options={currentQuestion.options || []}
+            question={currentQuestion.text}
+            options={currentQuestion.options}
             onSelect={handleOptionSelect}
             isLoading={isLoading}
-            stage={currentStage}
+            stage={currentQuestion.id}
           />
         </div>
         {isLoading && <LoadingOverlay message={loadingMessage} />}
@@ -177,14 +274,23 @@ export default function Home() {
 
   // Result view
   if (view === "result" && finalResult) {
+    // Convert internal result to the format expected by DiagnosisResult component
+    const resultForDisplay = {
+      type: "result" as const,
+      diagnosis: finalResult.diagnosis,
+      description: finalResult.description,
+      prescription: finalResult.advice + (finalResult.emergency_alert ? `\n\n⚠️ ${finalResult.emergency_alert}` : ""),
+      risk_level: getRiskLevelString(finalResult.risk_level),
+    };
+
     return (
       <div className="min-h-screen bg-background pb-20">
         <div className="max-w-lg mx-auto px-4 py-6">
           <StepIndicator currentStep="result" />
           <DiagnosisResult
-            result={finalResult}
-            correctedImageUrl={correctedImageUrl || finalResult.corrected_image_url}
-            brightnessMessage={brightnessMessage || finalResult.brightness_message}
+            result={resultForDisplay}
+            correctedImageUrl={correctedImageUrl || undefined}
+            brightnessMessage={brightnessMessage || undefined}
             onGoHome={handleGoHome}
             onViewHistory={() => navigate("/calendar")}
           />
@@ -246,7 +352,10 @@ export default function Home() {
         </div>
 
         {/* Daily Photo Capture Card */}
-        <Card className="p-4 border-0 shadow-md bg-card">
+        <Card 
+          className="p-4 border-0 shadow-md bg-card cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={handleStartDiagnosis}
+        >
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
               <Camera className="h-7 w-7 text-primary" />
@@ -258,6 +367,20 @@ export default function Home() {
                 <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">의료기록</span>
                 <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">안심관리</span>
               </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Debug Button */}
+        <Card 
+          className="p-3 border-2 border-dashed border-warning/50 bg-warning/5 cursor-pointer hover:border-warning transition-colors"
+          onClick={() => setView("debug")}
+        >
+          <div className="flex items-center gap-3">
+            <Bug className="h-5 w-5 text-warning" />
+            <div>
+              <p className="font-medium text-warning text-sm">디버그 모드 (테스트용)</p>
+              <p className="text-xs text-muted-foreground">서버 없이 AI 클래스를 직접 선택하여 문진 테스트</p>
             </div>
           </div>
         </Card>

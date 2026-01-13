@@ -84,3 +84,36 @@ export async function fetchDiagnosisHistory(): Promise<DiagnosisRecord[]> {
 
   return response.json();
 }
+
+// 진단 결과 저장 API
+export interface SaveDiagnosisRequest {
+  user_id?: string;
+  diagnosis: string;
+  description: string;
+  advice: string;
+  risk_level: number;
+  emergency_alert?: string | null;
+  corrected_image_url?: string;
+}
+
+export async function saveDiagnosisResult(data: SaveDiagnosisRequest): Promise<{ success: boolean }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/diagnose/save`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      console.warn("Failed to save diagnosis to server, but continuing...");
+      return { success: false };
+    }
+
+    return response.json();
+  } catch (error) {
+    console.warn("Server save failed, continuing offline:", error);
+    return { success: false };
+  }
+}
