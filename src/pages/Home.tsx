@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import iconMedicalRecord from "@/assets/icon-medical-record.png";
 import iconCalendar from "@/assets/icon-calendar.png";
 import iconInfo from "@/assets/icon-info.png";
+import iconPhotoCapture from "@/assets/icon-photo-capture.png";
 
 type HomeView = "main" | "camera" | "questionnaire" | "result" | "debug";
 
@@ -474,9 +475,7 @@ export default function Home() {
           onClick={handleStartDiagnosis}
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Camera className="h-7 w-7 text-primary" />
-            </div>
+            <img src={iconPhotoCapture} alt="사진 촬영" className="w-14 h-14 object-contain" />
             <div className="flex-1">
               <h3 className="font-semibold text-foreground">일별 사진 촬영 바로가기</h3>
               <p className="text-xs text-muted-foreground mt-0.5">오늘 아직 사진을 촬영하지 않았어요! 하루 1회 촬영을 권장합니다</p>
