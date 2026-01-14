@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, X, Check, FolderOpen, Loader2, AlertTriangle, Stethoscope, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, X, Check, FolderOpen, Loader2, AlertTriangle, Stethoscope, Save, User } from "lucide-react";
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
@@ -193,8 +193,8 @@ export default function CalendarPage() {
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <div className="w-10 h-10 rounded-full bg-primary-foreground/20 overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-sm">
-              👤
+            <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center">
+              <User className="h-5 w-5 text-amber-900" />
             </div>
           </div>
         </div>

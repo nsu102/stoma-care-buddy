@@ -8,14 +8,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { 
-  BookOpen, 
-  HelpCircle, 
-  Sparkles, 
+import {
+  BookOpen,
+  HelpCircle,
+  Sparkles,
   Heart,
   Shield,
   Droplets,
-  ChevronRight
+  ChevronRight,
+  Camera,
+  BarChart3,
+  RotateCw
 } from "lucide-react";
 
 const careGuides = [
@@ -176,7 +179,10 @@ export default function InfoPage() {
 
             <div className="space-y-3">
               <Card className="p-4">
-                <h4 className="font-medium text-foreground mb-2">📸 촬영 팁</h4>
+                <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-primary" />
+                  촬영 팁
+                </h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• 밝은 자연광이나 조명에서 촬영하세요</li>
                   <li>• 장루가 화면 중앙에 오도록 위치시키세요</li>
@@ -185,7 +191,10 @@ export default function InfoPage() {
               </Card>
 
               <Card className="p-4">
-                <h4 className="font-medium text-foreground mb-2">📊 분석 결과 이해하기</h4>
+                <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  분석 결과 이해하기
+                </h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• <span className="text-success font-medium">양호</span>: 정상적인 상태입니다</li>
                   <li>• <span className="text-warning font-medium">주의</span>: 관찰이 필요한 상태입니다</li>
@@ -194,7 +203,10 @@ export default function InfoPage() {
               </Card>
 
               <Card className="p-4">
-                <h4 className="font-medium text-foreground mb-2">🔄 정기 기록의 중요성</h4>
+                <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                  <RotateCw className="h-5 w-5 text-primary" />
+                  정기 기록의 중요성
+                </h4>
                 <p className="text-sm text-muted-foreground">
                   매일 같은 시간에 기록하면 AI가 변화 추이를 더 정확하게 분석할 수 있습니다.
                   규칙적인 기록 습관을 들여보세요.

@@ -9,21 +9,22 @@ import { QuestionnaireStep } from "@/components/QuestionnaireStep";
 import { DiagnosisResult } from "@/components/DiagnosisResult";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { StepIndicator } from "@/components/StepIndicator";
+import { AnalysisResultModal } from "@/components/AnalysisResultModal";
 import { uploadImage } from "@/lib/api";
 import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
 import { useCalendarData } from "@/hooks/useCalendarData";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  getNextStep, 
-  startEmergencyQuestionnaire, 
+import {
+  getNextStep,
+  startEmergencyQuestionnaire,
   getRiskLevelString,
   type AIClass,
   type Question,
   type FinalResult,
   type RetryResult
 } from "@/lib/triage";
-import { 
-  Camera, 
+import {
+  Camera,
   Plus,
   Search,
   Calendar,
@@ -34,7 +35,9 @@ import {
   Bug,
   Check,
   X,
-  Loader2
+  Loader2,
+  User,
+  UtensilsCrossed
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,25 +47,34 @@ export default function Home() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { saveDiagnosis, records } = useDiagnosisHistory();
-  const { 
-    getChecklistsByDate, 
-    addChecklistItem, 
-    updateChecklistItem, 
-    deleteChecklistItem, 
+  const {
+    getChecklistsByDate,
+    addChecklistItem,
+    updateChecklistItem,
+    deleteChecklistItem,
     toggleChecklistItem,
-    isLoading: checklistLoading 
+    isLoading: checklistLoading
   } = useCalendarData();
-  
+
   const [view, setView] = useState<HomeView>("main");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
-  
+
   // Checklist state
   const [isAddingChecklist, setIsAddingChecklist] = useState(false);
   const [newChecklistLabel, setNewChecklistLabel] = useState("");
   const [editingChecklistId, setEditingChecklistId] = useState<string | null>(null);
   const [editingChecklistLabel, setEditingChecklistLabel] = useState("");
-  
+
+  // Analysis result modal state
+  const [isAnalysisModalOpen, setIsAnalysisModalOpen] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<{
+    imageUrl: string;
+    necrosisClass: number;
+    brightnessVal: number;
+    brightnessMessage?: string;
+  } | null>(null);
+
   // Diagnosis state
   const [correctedImageUrl, setCorrectedImageUrl] = useState<string | null>(null);
   const [brightnessMessage, setBrightnessMessage] = useState<string | null>(null);
@@ -78,7 +90,7 @@ export default function Home() {
   // Checklist handlers
   const handleAddChecklist = async () => {
     if (!newChecklistLabel.trim()) return;
-    
+
     const result = await addChecklistItem(new Date(), newChecklistLabel.trim());
     if (result.success) {
       setNewChecklistLabel("");
@@ -91,7 +103,7 @@ export default function Home() {
 
   const handleUpdateChecklist = async (id: string) => {
     if (!editingChecklistLabel.trim()) return;
-    
+
     const result = await updateChecklistItem(id, { label: editingChecklistLabel.trim() });
     if (result.success) {
       setEditingChecklistId(null);
@@ -149,29 +161,59 @@ export default function Home() {
     try {
       setIsLoading(true);
       setLoadingMessage("이미지 분석 중...");
-      
-      const uploadResult = await uploadImage(imageBlob);
-      setCorrectedImageUrl(uploadResult.corrected_image_url);
-      setBrightnessMessage(uploadResult.brightness_message || null);
-      
-      // AI 클래스 설정 (1, 2, 3 중 하나)
-      const classNum = parseInt(uploadResult.necrosis_class) as AIClass;
+
+      // 실제 user.id 전달, 없으면 anonymous
+      const userId = user?.id || "anonymous";
+      const uploadResult = await uploadImage(imageBlob, userId);
+      console.log("Image upload result:", uploadResult);
+      console.log("Original URL:", uploadResult.data.original_image_url);
+      console.log("Corrected URL:", uploadResult.data.corrected_image_url);
+      console.log("Brightness message:", uploadResult.data.brightness_message || null);
+
+      // 분석 결과 저장
+      setCorrectedImageUrl(uploadResult.data.corrected_image_url);
+      setBrightnessMessage(uploadResult.data.brightness_message || null);
+
+      // AI 클래스 설정 (1, 2, 3, 4 중 하나)
+      const classNum = uploadResult.data.necrosis_class as AIClass;
       setAiClass(classNum || 1);
 
-      setLoadingMessage("문진 준비 중...");
-      
-      // 내부 문진 시스템으로 응급 문진 시작
-      const firstQuestion = startEmergencyQuestionnaire();
-      setCurrentQuestion(firstQuestion);
-      setView("questionnaire");
+      // 분석 결과 모달 데이터 설정 및 표시
+      setAnalysisResult({
+        imageUrl: uploadResult.data.corrected_image_url,
+        necrosisClass: classNum || 1,
+        brightnessVal: uploadResult.data.brightness_val,
+        brightnessMessage: uploadResult.data.brightness_message
+      });
+
+      setIsAnalysisModalOpen(true);
+      setView("main"); // 메인 뷰로 돌아가고 모달만 표시
     } catch (error) {
       console.error("Error during image upload:", error);
-      alert("서버 연결 실패. 디버그 모드로 진행합니다.");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("Detailed error:", errorMessage);
+      alert(`서버 연결 실패: ${errorMessage}\n디버그 모드로 진행합니다.`);
       // 서버 실패 시 디버그 모드로 전환
       setView("debug");
     } finally {
       setIsLoading(false);
     }
+  }, [user]);
+
+  const handleContinueToQuestionnaire = useCallback(() => {
+    // 모달 닫기
+    setIsAnalysisModalOpen(false);
+
+    // 내부 문진 시스템으로 응급 문진 시작
+    const firstQuestion = startEmergencyQuestionnaire();
+    setCurrentQuestion(firstQuestion);
+    setView("questionnaire");
+  }, []);
+
+  const handleCloseAnalysisModal = useCallback(() => {
+    setIsAnalysisModalOpen(false);
+    setAnalysisResult(null);
+    // 이미지 정보는 유지 (나중에 사용할 수 있음)
   }, []);
 
   const handleOptionSelect = useCallback(async (selectedIndex: number) => {
@@ -180,13 +222,13 @@ export default function Home() {
     try {
       setIsLoading(true);
       setLoadingMessage("다음 질문 준비 중...");
-      
+
       // 현재 질문을 히스토리에 저장
-      setQuestionHistory(prev => [...prev, { 
-        question: currentQuestion, 
-        diagnosis: currentQuestion.temp_diagnosis || savedDiagnosis 
+      setQuestionHistory(prev => [...prev, {
+        question: currentQuestion,
+        diagnosis: currentQuestion.temp_diagnosis || savedDiagnosis
       }]);
-      
+
       // 다음 단계 가져오기 (savedDiagnosis 전달)
       const nextStep = getNextStep(
         currentQuestion.id,
@@ -207,7 +249,7 @@ export default function Home() {
         const result = nextStep as FinalResult;
         setFinalResult(result);
         setView("result");
-        
+
         // 데이터베이스에 결과 저장 (모든 정보 포함)
         await saveDiagnosis({
           diagnosis: result.diagnosis,
@@ -240,11 +282,11 @@ export default function Home() {
       setView("main");
       return;
     }
-    
+
     // 마지막 질문으로 돌아가기
     const newHistory = [...questionHistory];
     const lastState = newHistory.pop();
-    
+
     if (lastState) {
       setCurrentQuestion(lastState.question);
       setSavedDiagnosis(lastState.diagnosis);
@@ -278,13 +320,13 @@ export default function Home() {
             <Bug className="h-12 w-12 text-warning mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-foreground mb-2">디버그 모드</h1>
             <p className="text-muted-foreground">
-              서버 연결 없이 문진을 테스트합니다.<br/>
+              서버 연결 없이 문진을 테스트합니다.<br />
               AI 클래스를 선택해주세요.
             </p>
           </div>
 
           <div className="space-y-4">
-            <Card 
+            <Card
               className="p-6 border-2 border-success/30 bg-success/5 cursor-pointer hover:border-success transition-colors"
               onClick={() => handleDebugStart(1)}
             >
@@ -294,7 +336,7 @@ export default function Home() {
               </p>
             </Card>
 
-            <Card 
+            <Card
               className="p-6 border-2 border-warning/30 bg-warning/5 cursor-pointer hover:border-warning transition-colors"
               onClick={() => handleDebugStart(2)}
             >
@@ -304,7 +346,7 @@ export default function Home() {
               </p>
             </Card>
 
-            <Card 
+            <Card
               className="p-6 border-2 border-destructive/30 bg-destructive/5 cursor-pointer hover:border-destructive transition-colors"
               onClick={() => handleDebugStart(3)}
             >
@@ -347,7 +389,7 @@ export default function Home() {
       <div className="min-h-screen bg-background pb-20">
         <div className="max-w-lg mx-auto px-4 py-6">
           <StepIndicator currentStep="questionnaire" />
-          
+
           {correctedImageUrl && (
             <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
               <img
@@ -413,18 +455,18 @@ export default function Home() {
             </span>
             <h1 className="text-2xl font-bold text-primary-foreground">오늘도 잘 하고 있어요</h1>
             <p className="text-primary-foreground/70 text-sm mt-1">
-              {records.length > 0 
+              {records.length > 0
                 ? `최근 검사: ${new Date(records[0].created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}`
                 : "아직 검사 기록이 없습니다"
               }
             </p>
           </div>
-          <button 
+          <button
             onClick={() => signOut()}
             className="w-12 h-12 rounded-full bg-primary-foreground/20 overflow-hidden hover:bg-primary-foreground/30 transition-colors"
           >
-            <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-lg">
-              👤
+            <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center">
+              <User className="h-6 w-6 text-amber-900" />
             </div>
           </button>
         </div>
@@ -435,7 +477,7 @@ export default function Home() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-xl font-bold text-warning">
-                {records.length > 0 
+                {records.length > 0
                   ? records[0].risk_level === 3 ? "위험" : records[0].risk_level === 2 ? "유의" : "정상"
                   : "-"
                 }
@@ -461,7 +503,7 @@ export default function Home() {
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <input 
+          <input
             type="text"
             placeholder="혹시 장루가 피부보다 안쪽으로 쏙 들어가 있나요?"
             className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -469,7 +511,7 @@ export default function Home() {
         </div>
 
         {/* Daily Photo Capture Card */}
-        <Card 
+        <Card
           className="p-4 border-0 shadow-md bg-card cursor-pointer hover:shadow-lg transition-shadow"
           onClick={handleStartDiagnosis}
         >
@@ -489,7 +531,7 @@ export default function Home() {
         </Card>
 
         {/* Debug Button */}
-        <Card 
+        <Card
           className="p-3 border-2 border-dashed border-warning/50 bg-warning/5 cursor-pointer hover:border-warning transition-colors"
           onClick={() => setView("debug")}
         >
@@ -504,7 +546,7 @@ export default function Home() {
 
         {/* Quick Action Icons */}
         <div className="grid grid-cols-3 gap-4">
-          <Card 
+          <Card
             className="p-4 border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow text-center"
             onClick={() => navigate("/calendar")}
           >
@@ -514,8 +556,8 @@ export default function Home() {
             <p className="text-sm font-medium text-foreground">진료기록</p>
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning mt-1" />
           </Card>
-          
-          <Card 
+
+          <Card
             className="p-4 border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow text-center"
             onClick={() => navigate("/calendar")}
           >
@@ -525,8 +567,8 @@ export default function Home() {
             <p className="text-sm font-medium text-foreground">캘린더</p>
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning mt-1" />
           </Card>
-          
-          <Card 
+
+          <Card
             className="p-4 border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow text-center"
             onClick={() => navigate("/info")}
           >
@@ -543,9 +585,9 @@ export default function Home() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-foreground">오늘의 체크리스트</h3>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="h-6 w-6 text-primary"
                 onClick={() => setIsAddingChecklist(true)}
               >
@@ -557,7 +599,7 @@ export default function Home() {
               {todayChecklists.filter(c => c.completed).length}/{todayChecklists.length} 완료
             </span>
           </div>
-          
+
           <div className="space-y-2">
             {/* Add new checklist input */}
             {isAddingChecklist && (
@@ -580,9 +622,9 @@ export default function Home() {
                   <Button size="icon" className="h-9 w-9" onClick={handleAddChecklist}>
                     <Check className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-9 w-9"
                     onClick={() => {
                       setIsAddingChecklist(false);
@@ -597,7 +639,7 @@ export default function Home() {
 
             {todayChecklists.length > 0 ? (
               todayChecklists.map((item) => (
-                <Card 
+                <Card
                   key={item.id}
                   className={`p-4 border-0 shadow-sm ${item.completed ? 'bg-primary/5' : 'bg-card'}`}
                 >
@@ -620,9 +662,9 @@ export default function Home() {
                         <Button size="icon" className="h-8 w-8" onClick={() => handleUpdateChecklist(item.id)}>
                           <Check className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8"
                           onClick={() => {
                             setEditingChecklistId(null);
@@ -634,11 +676,11 @@ export default function Home() {
                       </div>
                     ) : (
                       <>
-                        <div 
+                        <div
                           className="flex items-center gap-3 cursor-pointer flex-1"
                           onClick={() => handleToggleChecklist(item.id)}
                         >
-                          <Checkbox 
+                          <Checkbox
                             checked={item.completed}
                             onCheckedChange={() => handleToggleChecklist(item.id)}
                             className="h-5 w-5"
@@ -648,17 +690,17 @@ export default function Home() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-muted-foreground"
                             onClick={() => startEditingChecklist(item.id, item.label)}
                           >
                             <Edit3 className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
                             onClick={() => handleDeleteChecklist(item.id)}
                           >
@@ -674,7 +716,7 @@ export default function Home() {
               <Card className="p-6 border-0 shadow-sm text-center">
                 <p className="text-muted-foreground text-sm">
                   오늘의 체크리스트가 없습니다.<br />
-                  <button 
+                  <button
                     className="text-primary font-medium mt-1"
                     onClick={() => setIsAddingChecklist(true)}
                   >
@@ -689,13 +731,13 @@ export default function Home() {
         {/* Banner - Meal Kit */}
         <Card className="p-5 border-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground overflow-hidden relative">
           <div className="relative z-10">
-            <h3 className="text-lg font-bold mb-1">장루 환자에 적합한<br/>밀키트를 구매하세요</h3>
+            <h3 className="text-lg font-bold mb-1">장루 환자에 적합한<br />밀키트를 구매하세요</h3>
             <p className="text-sm text-primary-foreground/80 mt-2">
-              장루 관리에 부담이 적은 식단,<br/>맞춤 밀키트로 시작해보세요!
+              장루 관리에 부담이 적은 식단,<br />맞춤 밀키트로 시작해보세요!
             </p>
           </div>
-          <div className="absolute right-2 bottom-2 w-24 h-24 opacity-80">
-            🍱
+          <div className="absolute right-2 bottom-2 w-24 h-24 opacity-80 flex items-center justify-center">
+            <UtensilsCrossed className="h-20 w-20 text-primary-foreground/60" />
           </div>
         </Card>
 
@@ -710,6 +752,19 @@ export default function Home() {
           </ul>
         </Card>
       </div>
+
+      {/* Analysis Result Modal */}
+      {analysisResult && (
+        <AnalysisResultModal
+          isOpen={isAnalysisModalOpen}
+          onClose={handleCloseAnalysisModal}
+          onContinue={handleContinueToQuestionnaire}
+          imageUrl={analysisResult.imageUrl}
+          necrosisClass={analysisResult.necrosisClass}
+          brightnessVal={analysisResult.brightnessVal}
+          brightnessMessage={analysisResult.brightnessMessage}
+        />
+      )}
     </div>
   );
 }

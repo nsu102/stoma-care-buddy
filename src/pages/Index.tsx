@@ -7,15 +7,17 @@ import { HistoryList } from "@/components/HistoryList";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { StepIndicator } from "@/components/StepIndicator";
 import { uploadImage, startQuestionnaire, type QuestionResponse } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Camera, History, Heart, Shield, Sparkles } from "lucide-react";
 
 type AppView = "home" | "camera" | "questionnaire" | "result" | "history";
 
 export default function Index() {
+  const { user } = useAuth();
   const [view, setView] = useState<AppView>("home");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
-  
+
   // Diagnosis state
   const [correctedImageUrl, setCorrectedImageUrl] = useState<string | null>(null);
   const [brightnessMessage, setBrightnessMessage] = useState<string | null>(null);
@@ -42,25 +44,16 @@ export default function Index() {
     try {
       setIsLoading(true);
       setLoadingMessage("이미지 분석 중...");
-      
-      // Upload image to server
-      const uploadResult = await uploadImage(imageBlob);
-      setCorrectedImageUrl(uploadResult.corrected_image_url);
-      setBrightnessMessage(uploadResult.brightness_message || null);
-      setAiClass(uploadResult.necrosis_class);
 
-      // Start questionnaire
-      setLoadingMessage("문진 준비 중...");
-      const questionResult = await startQuestionnaire("START", uploadResult.necrosis_class);
-      
-      if (questionResult.type === "question") {
-        setCurrentQuestion(questionResult);
-        setCurrentStage(questionResult.stage || "START");
-        setView("questionnaire");
-      } else if (questionResult.type === "result") {
-        setFinalResult(questionResult);
-        setView("result");
-      }
+      // Upload image to server with user ID
+      const userId = user?.id || "anonymous";
+      const uploadResult = await uploadImage(imageBlob, 'anonymous');
+      setCorrectedImageUrl(uploadResult.data.corrected_image_url);
+      setBrightnessMessage(uploadResult.data.brightness_message || null);
+      setAiClass(String(uploadResult.data.necrosis_class));
+
+      // Show result directly (questionnaire removed)
+      setView("result");
     } catch (error) {
       console.error("Error during image upload:", error);
       alert("이미지 업로드 중 오류가 발생했습니다. 다시 시도해주세요.");
@@ -68,7 +61,7 @@ export default function Index() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const handleOptionSelect = useCallback(async (selectedIndex: number) => {
     if (!currentQuestion) return;
@@ -131,7 +124,7 @@ export default function Index() {
       <div className="min-h-screen bg-background">
         <div className="container max-w-lg mx-auto px-4 py-6">
           <StepIndicator currentStep="questionnaire" />
-          
+
           {/* Corrected image preview */}
           {correctedImageUrl && (
             <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
@@ -207,7 +200,7 @@ export default function Index() {
               맞춤 문진을 통해 진단합니다
             </p>
           </div>
-          
+
           <Button
             variant="hero"
             size="xl"
