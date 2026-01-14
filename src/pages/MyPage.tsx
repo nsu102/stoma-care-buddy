@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/AppHeader";
 import { 
-  User, 
   Moon,
   Shield,
   HelpCircle,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import iconPushNotification from "@/assets/icon-push-notification.png";
 import iconCameraReminder from "@/assets/icon-camera-reminder.png";
+import iconProfile from "@/assets/icon-profile.png";
 
 type SettingItem = {
   icon?: LucideIcon;
@@ -63,8 +63,8 @@ export default function MyPage() {
         {/* Profile Card */}
         <Card className="p-5">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
-              <User className="h-8 w-8 text-accent-foreground" />
+            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center overflow-hidden">
+              <img src={iconProfile} alt="프로필" className="w-14 h-14 object-contain" />
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-foreground">사용자님</h2>
