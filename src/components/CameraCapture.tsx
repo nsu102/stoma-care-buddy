@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, RotateCcw, Check, X, ImagePlus } from "lucide-react";
+import { Camera, RotateCcw, ImagePlus, X } from "lucide-react";
 
 interface CameraCaptureProps {
   onCapture: (imageBlob: Blob) => void;
@@ -16,6 +16,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cameraStarted, setCameraStarted] = useState(false);
+  const [showConfirmSheet, setShowConfirmSheet] = useState(false);
 
   const startCamera = useCallback(async () => {
     try {
@@ -63,6 +64,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
               setCapturedBlob(blob);
               setCapturedImage(URL.createObjectURL(blob));
               stopCamera();
+              setShowConfirmSheet(true);
             }
           },
           "image/jpeg",
@@ -78,6 +80,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
       stopCamera();
       setCapturedBlob(file);
       setCapturedImage(URL.createObjectURL(file));
+      setShowConfirmSheet(true);
     }
   }, [stopCamera]);
 
@@ -89,6 +92,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
     setCapturedImage(null);
     setCapturedBlob(null);
     setError(null);
+    setShowConfirmSheet(false);
     startCamera();
   }, [startCamera]);
 
@@ -139,93 +143,127 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-foreground">
+    <div className="fixed inset-0 z-50 flex flex-col bg-black">
       {fileInput}
-      <div className="relative flex-1 overflow-hidden">
-        {capturedImage ? (
-          <img
-            src={capturedImage}
-            alt="Captured"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="h-full w-full object-cover"
-          />
-        )}
-        <canvas ref={canvasRef} className="hidden" />
+      
+      {/* Top Banner */}
+      <div className="px-4 pt-8 pb-4 z-10">
+        <div className="bg-primary rounded-xl px-6 py-4 text-center">
+          <p className="text-primary-foreground font-medium">사진을 촬영해 주세요.</p>
+          <p className="text-primary-foreground/80 text-sm">장루가 화면 중앙에 오도록 맞춰 주세요!</p>
+        </div>
+      </div>
 
-        {/* Overlay guide */}
-        {!capturedImage && cameraStarted && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-64 h-64 border-4 border-primary/50 rounded-3xl">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground/80 text-background px-3 py-1 rounded-full text-sm">
-                장루 부위를 프레임 안에 맞춰주세요
-              </div>
-            </div>
+      {/* Camera/Image Area */}
+      <div className="flex-1 relative overflow-hidden mx-4 mb-4">
+        <div className="bg-gray-800 rounded-2xl overflow-hidden h-full flex flex-col">
+          {/* Camera Header */}
+          <div className="bg-gray-700 py-3 text-center">
+            <span className="text-white font-medium">카메라</span>
           </div>
-        )}
+
+          {/* Camera View */}
+          <div className="flex-1 relative">
+            {capturedImage ? (
+              <img
+                src={capturedImage}
+                alt="Captured"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="h-full w-full object-cover"
+              />
+            )}
+            <canvas ref={canvasRef} className="hidden" />
+
+            {/* Circular Guide Overlay */}
+            {!capturedImage && cameraStarted && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-56 h-56 border-4 border-primary rounded-full" />
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Close button */}
         <button
           onClick={handleCancel}
-          className="absolute top-4 right-4 p-2 rounded-full bg-foreground/50 text-background hover:bg-foreground/70 transition-colors"
+          className="absolute top-14 right-3 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
         >
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Controls */}
-      <div className="bg-foreground p-6 pb-8 safe-area-inset-bottom">
-        <div className="flex items-center justify-center gap-6">
-          {capturedImage ? (
-            <>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={retakePhoto}
-                className="bg-background/10 border-background/30 text-background hover:bg-background/20"
-              >
-                <RotateCcw className="mr-2 h-5 w-5" />
-                다시 선택
-              </Button>
-              <Button
-                variant="hero"
-                size="lg"
-                onClick={confirmPhoto}
-              >
-                <Check className="mr-2 h-5 w-5" />
-                사용하기
-              </Button>
-            </>
-          ) : (
-            <>
-              {/* Gallery button */}
-              <button
-                onClick={openGallery}
-                className="w-14 h-14 rounded-full bg-background/20 flex items-center justify-center hover:bg-background/30 active:scale-95 transition-all"
-              >
-                <ImagePlus className="h-6 w-6 text-background" />
-              </button>
+      {/* Bottom Controls (when not showing confirm sheet) */}
+      {!showConfirmSheet && (
+        <div className="bg-black p-6 pb-8 safe-area-inset-bottom">
+          <div className="flex items-center justify-center gap-6">
+            {/* Gallery button */}
+            <button
+              onClick={openGallery}
+              className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 active:scale-95 transition-all"
+            >
+              <ImagePlus className="h-6 w-6 text-white" />
+            </button>
 
-              {/* Capture button */}
-              <button
-                onClick={capturePhoto}
-                className="w-20 h-20 rounded-full bg-background flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-transform"
-              >
-                <div className="w-16 h-16 rounded-full border-4 border-primary" />
-              </button>
+            {/* Capture button */}
+            <button
+              onClick={capturePhoto}
+              className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-transform"
+            >
+              <div className="w-16 h-16 rounded-full border-4 border-primary" />
+            </button>
 
-              {/* Spacer for balance */}
-              <div className="w-14 h-14" />
-            </>
-          )}
+            {/* Spacer for balance */}
+            <div className="w-14 h-14" />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Confirm Sheet Modal */}
+      {showConfirmSheet && (
+        <div className="bg-background rounded-t-3xl px-6 pt-4 pb-8 safe-area-inset-bottom">
+          {/* Handle */}
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-1 bg-muted-foreground/30 rounded-full" />
+          </div>
+
+          {/* Title */}
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-bold text-foreground mb-2">이 사진으로 예측할까요?</h2>
+            <p className="text-muted-foreground text-sm">사진이 흐리면 결과가 부정확할 수 있습니다</p>
+          </div>
+
+          {/* Buttons */}
+          <div className="space-y-3">
+            <Button 
+              className="w-full h-14 text-base font-semibold rounded-xl"
+              onClick={confirmPhoto}
+            >
+              분석 하기
+            </Button>
+            <Button 
+              variant="outline"
+              className="w-full h-14 text-base font-semibold rounded-xl border-2 border-primary text-primary hover:bg-primary/5"
+              onClick={retakePhoto}
+            >
+              <RotateCcw className="mr-2 h-5 w-5" />
+              다시 찍기
+            </Button>
+            <button 
+              className="w-full py-3 text-muted-foreground text-sm underline"
+              onClick={handleCancel}
+            >
+              다음에 할래요
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
