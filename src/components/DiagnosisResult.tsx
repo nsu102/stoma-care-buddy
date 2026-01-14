@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CheckCircle, AlertCircle, Home, History, Sun } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { AlertTriangle, CheckCircle, AlertCircle, Home, History, Sun, TrendingUp, TrendingDown, Minus, Calendar } from "lucide-react";
+
 interface DiagnosisResultData {
   type: "result";
   diagnosis: string;
@@ -9,18 +11,78 @@ interface DiagnosisResultData {
   emergency_alert?: string | null;
 }
 
+interface BrightnessComparisonData {
+  currentBrightness: number;
+  previousBrightness: number | null;
+  daysAgo: number;
+}
+
 interface DiagnosisResultProps {
   result: DiagnosisResultData;
   correctedImageUrl?: string;
   brightnessMessage?: string;
+  brightnessComparison?: BrightnessComparisonData;
   onGoHome: () => void;
   onViewHistory: () => void;
 }
+
+// 7일 전 밝기 비교 정보 계산
+const getBrightnessComparisonInfo = (current: number, previous: number | null, daysAgo: number) => {
+  if (previous === null) {
+    return {
+      icon: Calendar,
+      text: `${daysAgo}일 전 기록이 없습니다`,
+      subtext: "꾸준히 기록하면 변화를 추적할 수 있어요",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted/50",
+      percentage: 0,
+      hasComparison: false
+    };
+  }
+
+  const diff = current - previous;
+  const percentage = Math.abs((diff / previous) * 100).toFixed(1);
+
+  if (Math.abs(diff) < 0.5) {
+    return {
+      icon: Minus,
+      text: `${daysAgo}일 전과 비슷한 밝기`,
+      subtext: `이전: ${previous.toFixed(1)} → 현재: ${current.toFixed(1)}`,
+      color: "text-muted-foreground",
+      bgColor: "bg-muted/50",
+      percentage: 0,
+      hasComparison: true
+    };
+  }
+
+  if (diff > 0) {
+    return {
+      icon: TrendingUp,
+      text: `${daysAgo}일 전보다 ${percentage}% 밝아짐`,
+      subtext: `이전: ${previous.toFixed(1)} → 현재: ${current.toFixed(1)}`,
+      color: "text-success",
+      bgColor: "bg-success/10",
+      percentage: Number(percentage),
+      hasComparison: true
+    };
+  }
+
+  return {
+    icon: TrendingDown,
+    text: `${daysAgo}일 전보다 ${percentage}% 어두워짐`,
+    subtext: `이전: ${previous.toFixed(1)} → 현재: ${current.toFixed(1)}`,
+    color: "text-warning",
+    bgColor: "bg-warning/10",
+    percentage: Number(percentage),
+    hasComparison: true
+  };
+};
 
 export function DiagnosisResult({
   result,
   correctedImageUrl,
   brightnessMessage,
+  brightnessComparison,
   onGoHome,
   onViewHistory,
 }: DiagnosisResultProps) {
@@ -82,6 +144,51 @@ export function DiagnosisResult({
             </div>
           )}
         </div>
+      )}
+
+      {/* 7일 전 밝기 비교 */}
+      {brightnessComparison && (
+        (() => {
+          const comparisonInfo = getBrightnessComparisonInfo(
+            brightnessComparison.currentBrightness,
+            brightnessComparison.previousBrightness,
+            brightnessComparison.daysAgo
+          );
+          const ComparisonIcon = comparisonInfo.icon;
+
+          return (
+            <Card className={`p-4 ${comparisonInfo.bgColor} border-0 shadow-lg`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${comparisonInfo.bgColor}`}>
+                  <ComparisonIcon className={`h-5 w-5 ${comparisonInfo.color}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`font-semibold ${comparisonInfo.color}`}>
+                    {comparisonInfo.text}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {comparisonInfo.subtext}
+                  </p>
+                </div>
+              </div>
+              {comparisonInfo.hasComparison && (
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        comparisonInfo.percentage > 0 ? 'bg-success' : comparisonInfo.percentage < 0 ? 'bg-warning' : 'bg-muted-foreground'
+                      }`}
+                      style={{ width: `${Math.min(Math.abs(comparisonInfo.percentage), 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {comparisonInfo.percentage > 0 ? '+' : ''}{comparisonInfo.percentage.toFixed(1)}%
+                  </span>
+                </div>
+              )}
+            </Card>
+          );
+        })()
       )}
 
       {/* Diagnosis Card */}

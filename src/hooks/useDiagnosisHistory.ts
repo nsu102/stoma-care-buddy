@@ -119,6 +119,40 @@ export function useDiagnosisHistory() {
     });
   }, [records]);
 
+  // 7일 전 기록 조회 (±2일 범위로 찾음)
+  const getRecordFromDaysAgo = useCallback((daysAgo: number = 7) => {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() - daysAgo);
+
+    // ±2일 범위 허용 (5~9일 전 기록 중 가장 가까운 것)
+    const minDate = new Date(targetDate);
+    minDate.setDate(minDate.getDate() - 2);
+    const maxDate = new Date(targetDate);
+    maxDate.setDate(maxDate.getDate() + 2);
+
+    const recordsInRange = records.filter(record => {
+      const recordDate = new Date(record.created_at);
+      return recordDate >= minDate && recordDate <= maxDate;
+    });
+
+    // 가장 targetDate에 가까운 기록 반환
+    if (recordsInRange.length === 0) return null;
+
+    return recordsInRange.reduce((closest, record) => {
+      const recordDate = new Date(record.created_at);
+      const closestDate = new Date(closest.created_at);
+      const recordDiff = Math.abs(recordDate.getTime() - targetDate.getTime());
+      const closestDiff = Math.abs(closestDate.getTime() - targetDate.getTime());
+      return recordDiff < closestDiff ? record : closest;
+    });
+  }, [records]);
+
+  // 7일 전 밝기값 조회
+  const getBrightnessFromDaysAgo = useCallback((daysAgo: number = 7): number | null => {
+    const record = getRecordFromDaysAgo(daysAgo);
+    return record?.brightness ?? null;
+  }, [getRecordFromDaysAgo]);
+
   useEffect(() => {
     fetchRecords();
   }, [fetchRecords]);
@@ -131,5 +165,7 @@ export function useDiagnosisHistory() {
     saveDiagnosis,
     getRecordsByDate,
     getRecordsForMonth,
+    getRecordFromDaysAgo,
+    getBrightnessFromDaysAgo,
   };
 }

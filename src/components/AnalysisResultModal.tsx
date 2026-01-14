@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { X, Lightbulb } from "lucide-react";
+import { X, Lightbulb, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface AnalysisResultModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface AnalysisResultModalProps {
   necrosisClass: number;
   brightnessVal: number;
   brightnessMessage?: string;
+  previousBrightness?: number | null;
 }
 
 const getClassInfo = (classNum: number) => {
@@ -47,6 +48,54 @@ const getClassInfo = (classNum: number) => {
   return classInfoMap[classNum as keyof typeof classInfoMap] || classInfoMap[1];
 };
 
+// 밝기 비교 정보 계산
+const getBrightnessComparison = (current: number, previous: number | null | undefined) => {
+  if (previous === null || previous === undefined) {
+    return {
+      icon: Minus,
+      text: "첫 번째 측정입니다",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted/50",
+      diff: 0,
+      percentage: 0
+    };
+  }
+
+  const diff = current - previous;
+  const percentage = ((diff / previous) * 100).toFixed(1);
+
+  if (Math.abs(diff) < 0.5) {
+    return {
+      icon: Minus,
+      text: "이전과 비슷한 밝기입니다",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted/50",
+      diff,
+      percentage: 0
+    };
+  }
+
+  if (diff > 0) {
+    return {
+      icon: TrendingUp,
+      text: `이전보다 ${Math.abs(Number(percentage))}% 밝아졌습니다`,
+      color: "text-success",
+      bgColor: "bg-success/10",
+      diff,
+      percentage: Number(percentage)
+    };
+  }
+
+  return {
+    icon: TrendingDown,
+    text: `이전보다 ${Math.abs(Number(percentage))}% 어두워졌습니다`,
+    color: "text-warning",
+    bgColor: "bg-warning/10",
+    diff,
+    percentage: Number(percentage)
+  };
+};
+
 export function AnalysisResultModal({
   isOpen,
   onClose,
@@ -54,11 +103,13 @@ export function AnalysisResultModal({
   imageUrl,
   necrosisClass,
   brightnessVal,
-  brightnessMessage
+  brightnessMessage,
+  previousBrightness
 }: AnalysisResultModalProps) {
   if (!isOpen) return null;
 
   const classInfo = getClassInfo(necrosisClass);
+  const brightnessComparison = getBrightnessComparison(brightnessVal, previousBrightness);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -104,9 +155,25 @@ export function AnalysisResultModal({
           {/* Brightness Information */}
           <div className="space-y-2">
             <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <span className="text-sm font-medium text-foreground">밝기 값</span>
+              <span className="text-sm font-medium text-foreground">현재 밝기</span>
               <span className="text-sm font-mono text-foreground">{brightnessVal.toFixed(1)}</span>
             </div>
+
+            {/* 이전 밝기값과 비교 */}
+            <Card className={`p-3 ${brightnessComparison.bgColor} border-0`}>
+              <div className="flex items-center gap-2">
+                <brightnessComparison.icon className={`h-4 w-4 ${brightnessComparison.color} flex-shrink-0`} />
+                <span className={`text-sm font-medium ${brightnessComparison.color}`}>
+                  {brightnessComparison.text}
+                </span>
+              </div>
+              {previousBrightness !== null && previousBrightness !== undefined && (
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>이전 측정값</span>
+                  <span className="font-mono">{previousBrightness.toFixed(1)}</span>
+                </div>
+              )}
+            </Card>
 
             {brightnessMessage && (
               <Card className="p-3 bg-primary/5 border-primary/20">

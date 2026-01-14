@@ -47,7 +47,7 @@ type HomeView = "main" | "camera" | "questionnaire" | "result" | "debug";
 export default function Home() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { saveDiagnosis, records } = useDiagnosisHistory();
+  const { saveDiagnosis, records, getBrightnessFromDaysAgo } = useDiagnosisHistory();
   const {
     getChecklistsByDate,
     addChecklistItem,
@@ -79,6 +79,7 @@ export default function Home() {
   // Diagnosis state
   const [correctedImageUrl, setCorrectedImageUrl] = useState<string | null>(null);
   const [brightnessMessage, setBrightnessMessage] = useState<string | null>(null);
+  const [currentBrightness, setCurrentBrightness] = useState<number | null>(null);
   const [aiClass, setAiClass] = useState<AIClass>(1);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [savedDiagnosis, setSavedDiagnosis] = useState<string>("");
@@ -136,6 +137,7 @@ export default function Home() {
   const resetDiagnosis = useCallback(() => {
     setCorrectedImageUrl(null);
     setBrightnessMessage(null);
+    setCurrentBrightness(null);
     setAiClass(1);
     setCurrentQuestion(null);
     setSavedDiagnosis("");
@@ -174,6 +176,7 @@ export default function Home() {
       // 분석 결과 저장
       setCorrectedImageUrl(uploadResult.data.corrected_image_url);
       setBrightnessMessage(null); // 백엔드에서 더 이상 제공하지 않음
+      setCurrentBrightness(uploadResult.data.brightness); // 현재 밝기값 저장
 
       // AI 클래스 설정 (1, 2, 3, 4 중 하나)
       const classNum = uploadResult.data.necrosis_class as AIClass;
@@ -256,6 +259,7 @@ export default function Home() {
           diagnosis: result.diagnosis,
           description: result.description,
           risk_level: result.risk_level,
+          brightness: currentBrightness ?? undefined,
           image_url: correctedImageUrl || undefined,
           advice: result.advice || undefined,
           emergency_alert: result.emergency_alert || undefined,
@@ -428,6 +432,13 @@ export default function Home() {
       emergency_alert: finalResult.emergency_alert,
     };
 
+    // 7일 전 밝기값과 비교 데이터 준비
+    const brightnessComparisonData = currentBrightness !== null ? {
+      currentBrightness: currentBrightness,
+      previousBrightness: getBrightnessFromDaysAgo(7),
+      daysAgo: 7
+    } : undefined;
+
     return (
       <div className="min-h-screen bg-background pb-20">
         <div className="max-w-lg mx-auto px-4 py-6">
@@ -436,6 +447,7 @@ export default function Home() {
             result={resultForDisplay}
             correctedImageUrl={correctedImageUrl || undefined}
             brightnessMessage={brightnessMessage || undefined}
+            brightnessComparison={brightnessComparisonData}
             onGoHome={handleGoHome}
             onViewHistory={() => navigate("/calendar")}
           />
@@ -756,6 +768,7 @@ export default function Home() {
           necrosisClass={analysisResult.necrosisClass}
           brightnessVal={analysisResult.brightnessVal}
           brightnessMessage={analysisResult.brightnessMessage}
+          previousBrightness={getBrightnessFromDaysAgo(7)}
         />
       )}
     </div>

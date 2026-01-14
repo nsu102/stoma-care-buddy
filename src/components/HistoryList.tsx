@@ -74,10 +74,10 @@ export function HistoryList({ onBack }: HistoryListProps) {
           목록으로
         </Button>
 
-        {selectedRecord.corrected_image_url && (
+        {selectedRecord.image_url && (
           <div className="rounded-2xl overflow-hidden shadow-lg">
             <img
-              src={selectedRecord.corrected_image_url}
+              src={selectedRecord.image_url}
               alt="진단 이미지"
               className="w-full h-48 object-cover"
             />
