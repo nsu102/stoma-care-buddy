@@ -138,31 +138,24 @@ export default function CalendarPage() {
     return "good";                       // 위험도 0 = 정상
   };
 
-  const getStatusDotColor = (status: string | null) => {
-    switch (status) {
-      case "good": return "bg-success";
-      case "warning": return "bg-warning";
-      case "danger": return "bg-destructive";
-      default: return "";
-    }
-  };
-
-  const getDayCircleStyle = (date: Date, status: string | null, isSelected: boolean) => {
+  // Get background color for date circle based on status
+  const getDateCircleStyle = (date: Date, status: string | null, isSelected: boolean, isToday: boolean) => {
     if (isSelected) {
       return "bg-primary text-primary-foreground";
     }
-    if (status) {
-      if (status === "danger") {
-        return "bg-rose-100 text-rose-600";
-      }
-      if (status === "good") {
-        return "border-2 border-primary text-primary";
-      }
-      if (status === "warning") {
-        return "bg-warning/20 text-warning";
-      }
+    if (status === "danger") {
+      return "bg-rose-400 text-white";
     }
-    return "text-foreground";
+    if (status === "warning") {
+      return "bg-amber-400 text-white";
+    }
+    if (status === "good") {
+      return "bg-emerald-400 text-white";
+    }
+    if (isToday) {
+      return "border-2 border-primary text-primary";
+    }
+    return "text-foreground hover:bg-muted";
   };
 
   // Generate calendar days
@@ -257,10 +250,10 @@ export default function CalendarPage() {
                 </div>
 
                 {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-y-1">
+                <div className="grid grid-cols-7 gap-y-2">
                   {calendarDays.map((day, idx) => {
                     if (!day) {
-                      return <div key={`empty-${idx}`} className="h-10" />;
+                      return <div key={`empty-${idx}`} className="h-12" />;
                     }
                     const status = getDateStatus(day);
                     const isSelected = isSameDay(day, selectedDate);
@@ -270,13 +263,10 @@ export default function CalendarPage() {
                       <div key={day.toISOString()} className="flex flex-col items-center">
                         <button
                           onClick={() => setSelectedDate(day)}
-                          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${getDayCircleStyle(day, status, isSelected)}`}
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${getDateCircleStyle(day, status, isSelected, isToday)}`}
                         >
                           {day.getDate()}
                         </button>
-                        {status && (
-                          <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${getStatusDotColor(status)}`} />
-                        )}
                       </div>
                     );
                   })}
