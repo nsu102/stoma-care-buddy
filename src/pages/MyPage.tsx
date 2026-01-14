@@ -76,21 +76,21 @@ export default function MyPage() {
           </div>
         </Card>
 
-        {/* Stats Card */}
-        <Card className="p-5">
-          <h3 className="font-semibold text-foreground mb-4">나의 기록 통계</h3>
+        {/* Health Summary Card */}
+        <Card className="p-5 bg-blue-50 border-0 rounded-2xl">
+          <h3 className="font-semibold text-primary mb-4">나의 건강 요약</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-primary">28</p>
-              <p className="text-xs text-muted-foreground">총 기록</p>
+              <p className="text-2xl font-bold text-emerald-500">유의</p>
+              <p className="text-xs text-muted-foreground mt-1">진단 상태</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-success">24</p>
-              <p className="text-xs text-muted-foreground">양호</p>
+              <p className="text-2xl font-bold text-foreground">45</p>
+              <p className="text-xs text-muted-foreground mt-1">총 기록일</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-warning">4</p>
-              <p className="text-xs text-muted-foreground">주의</p>
+              <p className="text-2xl font-bold text-primary">38</p>
+              <p className="text-xs text-muted-foreground mt-1">촬영 횟수</p>
             </div>
           </div>
         </Card>
