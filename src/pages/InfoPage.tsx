@@ -6,44 +6,36 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { 
-  HelpCircle, 
-  Shield,
-  Pill,
-  Users,
   BookOpen,
   MapPin,
   Phone,
   Clock
 } from "lucide-react";
+import iconStomaIntro from "@/assets/icon-stoma-intro.png";
+import iconStomaCare from "@/assets/icon-stoma-care.png";
+import iconComplications from "@/assets/icon-complications.png";
+import iconCareGuide from "@/assets/icon-care-guide.png";
 
 const categories = [
   {
     id: "1",
-    icon: HelpCircle,
-    title: "장루란?",
-    color: "bg-emerald-100",
-    iconColor: "text-emerald-600"
+    icon: iconStomaIntro,
+    title: "장루란?"
   },
   {
     id: "2",
-    icon: Shield,
-    title: "장루 관리 방법",
-    color: "bg-primary/10",
-    iconColor: "text-primary"
+    icon: iconStomaCare,
+    title: "장루 관리 방법"
   },
   {
     id: "3",
-    icon: Pill,
-    title: "합병증 소개",
-    color: "bg-emerald-100",
-    iconColor: "text-emerald-600"
+    icon: iconComplications,
+    title: "합병증 소개"
   },
   {
     id: "4",
-    icon: Users,
-    title: "관리 가이드",
-    color: "bg-primary/10",
-    iconColor: "text-primary"
+    icon: iconCareGuide,
+    title: "관리 가이드"
   },
 ];
 
@@ -92,8 +84,8 @@ export default function InfoPage() {
                 key={category.id}
                 className="flex flex-col items-center gap-2 cursor-pointer group"
               >
-                <div className={`w-16 h-16 rounded-full ${category.color} flex items-center justify-center transition-transform group-hover:scale-105`}>
-                  <category.icon className={`h-7 w-7 ${category.iconColor}`} />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
+                  <img src={category.icon} alt={category.title} className="w-16 h-16 object-contain" />
                 </div>
                 <span className="text-xs text-foreground font-medium text-center leading-tight">
                   {category.title}
