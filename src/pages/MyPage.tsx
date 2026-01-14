@@ -3,18 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/AppHeader";
 import { 
-  Moon,
-  Shield,
-  HelpCircle,
-  FileText,
   ChevronRight,
   LogOut,
-  Settings,
   LucideIcon
 } from "lucide-react";
 import iconPushNotification from "@/assets/icon-push-notification.png";
 import iconCameraReminder from "@/assets/icon-camera-reminder.png";
 import iconProfile from "@/assets/icon-profile.png";
+import iconDarkmode from "@/assets/icon-darkmode.png";
+import iconSettings from "@/assets/icon-settings.png";
+import iconHelp from "@/assets/icon-help.png";
+import iconTerms from "@/assets/icon-terms.png";
+import iconPrivacy from "@/assets/icon-privacy.png";
 
 type SettingItem = {
   icon?: LucideIcon;
@@ -40,16 +40,16 @@ const settingsGroups: SettingsGroup[] = [
   {
     title: "앱 설정",
     items: [
-      { icon: Moon, label: "다크 모드", type: "toggle", enabled: false },
-      { icon: Settings, label: "일반 설정", type: "link" },
+      { iconImage: iconDarkmode, label: "다크 모드", type: "toggle", enabled: false },
+      { iconImage: iconSettings, label: "일반 설정", type: "link" },
     ]
   },
   {
     title: "지원",
     items: [
-      { icon: HelpCircle, label: "도움말", type: "link" },
-      { icon: FileText, label: "이용약관", type: "link" },
-      { icon: Shield, label: "개인정보처리방침", type: "link" },
+      { iconImage: iconHelp, label: "도움말", type: "link" },
+      { iconImage: iconTerms, label: "이용약관", type: "link" },
+      { iconImage: iconPrivacy, label: "개인정보처리방침", type: "link" },
     ]
   },
 ];
