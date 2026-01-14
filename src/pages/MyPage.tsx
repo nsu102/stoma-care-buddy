@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/AppHeader";
-import { 
+import {
   ChevronRight,
   LogOut,
   LucideIcon
@@ -15,6 +15,7 @@ import iconSettings from "@/assets/icon-settings.png";
 import iconHelp from "@/assets/icon-help.png";
 import iconTerms from "@/assets/icon-terms.png";
 import iconPrivacy from "@/assets/icon-privacy.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 type SettingItem = {
   icon?: LucideIcon;
@@ -55,10 +56,11 @@ const settingsGroups: SettingsGroup[] = [
 ];
 
 export default function MyPage() {
+  const { signOut } = useAuth()
   return (
     <div className="min-h-screen bg-background pb-20">
       <AppHeader title="마이페이지" />
-      
+
       <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
         {/* Profile Card */}
         <Card className="p-5">
@@ -105,9 +107,8 @@ export default function MyPage() {
               {group.items.map((item, itemIdx) => (
                 <div
                   key={itemIdx}
-                  className={`flex items-center justify-between p-4 ${
-                    itemIdx !== group.items.length - 1 ? "border-b border-border" : ""
-                  }`}
+                  className={`flex items-center justify-between p-4 ${itemIdx !== group.items.length - 1 ? "border-b border-border" : ""
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     {item.iconImage ? (
@@ -129,7 +130,7 @@ export default function MyPage() {
         ))}
 
         {/* Logout Button */}
-        <Button variant="outline" className="w-full text-destructive hover:text-destructive">
+        <Button onClick={signOut} variant="outline" className="w-full text-destructive hover:text-destructive">
           <LogOut className="h-4 w-4 mr-2" />
           로그아웃
         </Button>

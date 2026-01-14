@@ -47,9 +47,9 @@ export default function Index() {
 
       // Upload image to server with user ID
       const userId = user?.id || "anonymous";
-      const uploadResult = await uploadImage(imageBlob, 'anonymous');
+      const uploadResult = await uploadImage(imageBlob, userId);
       setCorrectedImageUrl(uploadResult.data.corrected_image_url);
-      setBrightnessMessage(uploadResult.data.brightness_message || null);
+      setBrightnessMessage(null);
       setAiClass(String(uploadResult.data.necrosis_class));
 
       // Show result directly (questionnaire removed)

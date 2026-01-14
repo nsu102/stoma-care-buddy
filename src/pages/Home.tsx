@@ -169,11 +169,11 @@ export default function Home() {
       console.log("Image upload result:", uploadResult);
       console.log("Original URL:", uploadResult.data.original_image_url);
       console.log("Corrected URL:", uploadResult.data.corrected_image_url);
-      console.log("Brightness message:", uploadResult.data.brightness_message || null);
+      console.log("Brightness:", uploadResult.data.brightness);
 
       // 분석 결과 저장
       setCorrectedImageUrl(uploadResult.data.corrected_image_url);
-      setBrightnessMessage(uploadResult.data.brightness_message || null);
+      setBrightnessMessage(null); // 백엔드에서 더 이상 제공하지 않음
 
       // AI 클래스 설정 (1, 2, 3, 4 중 하나)
       const classNum = uploadResult.data.necrosis_class as AIClass;
@@ -183,8 +183,8 @@ export default function Home() {
       setAnalysisResult({
         imageUrl: uploadResult.data.corrected_image_url,
         necrosisClass: classNum || 1,
-        brightnessVal: uploadResult.data.brightness_val,
-        brightnessMessage: uploadResult.data.brightness_message
+        brightnessVal: uploadResult.data.brightness,
+        brightnessMessage: undefined
       });
 
       setIsAnalysisModalOpen(true);

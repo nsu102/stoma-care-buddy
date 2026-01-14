@@ -7,8 +7,7 @@ export interface UploadResponse {
     original_image_url: string;
     corrected_image_url: string;
     necrosis_class: number;
-    brightness_val: number;
-    brightness_message: string;
+    brightness: number;
   };
   message: string;
 }
@@ -18,9 +17,13 @@ export interface DiagnosisRecord {
   created_at: string;
   user_id: string;
   image_url: string;
-  necrosis_class: number;
-  brightness_val: number;
-  brightness_diff: number;
+  diagnosis: string;
+  description: string;
+  risk_level: number;
+  brightness: number;
+  sacs_grade?: number;
+  advice?: string;
+  emergency_alert?: string;
 }
 
 export async function uploadImage(imageBlob: Blob, userId: string = "anonymous"): Promise<UploadResponse> {

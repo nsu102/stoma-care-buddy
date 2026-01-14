@@ -50,6 +50,7 @@ export function useDiagnosisHistory() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      console.log(data)
       setRecords(data || []);
     } catch (err) {
       console.error("Error fetching diagnosis history:", err);
@@ -81,7 +82,7 @@ export function useDiagnosisHistory() {
         });
 
       if (error) throw error;
-      
+
       // Refresh records after saving
       await fetchRecords();
       return { success: true, error: null };
@@ -97,7 +98,7 @@ export function useDiagnosisHistory() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const localDateStr = `${year}-${month}-${day}`;
-    
+
     return records.filter(record => {
       // created_at을 로컬 시간으로 변환하여 비교
       const recordDate = new Date(record.created_at);
@@ -105,7 +106,7 @@ export function useDiagnosisHistory() {
       const recordMonth = String(recordDate.getMonth() + 1).padStart(2, '0');
       const recordDay = String(recordDate.getDate()).padStart(2, '0');
       const recordLocalDateStr = `${recordYear}-${recordMonth}-${recordDay}`;
-      
+
       return recordLocalDateStr === localDateStr;
     });
   }, [records]);
