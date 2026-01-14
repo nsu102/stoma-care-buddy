@@ -336,16 +336,7 @@ export default function Home() {
           onCapture={handleImageCapture}
           onCancel={() => setView("main")}
         />
-        {isLoading && (
-          <LoadingOverlay 
-            message={loadingMessage} 
-            imageUrl={correctedImageUrl || undefined}
-            onCancel={() => {
-              setIsLoading(false);
-              setView("main");
-            }}
-          />
-        )}
+        {isLoading && <LoadingOverlay message={loadingMessage} />}
       </>
     );
   }
@@ -353,24 +344,32 @@ export default function Home() {
   // Questionnaire view
   if (view === "questionnaire" && currentQuestion) {
     return (
-      <>
-        <QuestionnaireStep
-          question={currentQuestion.text}
-          options={currentQuestion.options}
-          onSelect={handleOptionSelect}
-          onBack={handleGoBack}
-          canGoBack={true}
-          isLoading={isLoading}
-          stage={currentQuestion.id}
-          diagnosis={currentQuestion.temp_diagnosis || savedDiagnosis || "문진을 진행합니다"}
-        />
-        {isLoading && (
-          <LoadingOverlay 
-            message={loadingMessage} 
-            imageUrl={correctedImageUrl || undefined}
+      <div className="min-h-screen bg-background pb-20">
+        <div className="max-w-lg mx-auto px-4 py-6">
+          <StepIndicator currentStep="questionnaire" />
+          
+          {correctedImageUrl && (
+            <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
+              <img
+                src={correctedImageUrl}
+                alt="분석 중인 이미지"
+                className="w-full h-32 object-cover"
+              />
+            </div>
+          )}
+
+          <QuestionnaireStep
+            question={currentQuestion.text}
+            options={currentQuestion.options}
+            onSelect={handleOptionSelect}
+            onBack={handleGoBack}
+            canGoBack={true}
+            isLoading={isLoading}
+            stage={currentQuestion.id}
           />
-        )}
-      </>
+        </div>
+        {isLoading && <LoadingOverlay message={loadingMessage} />}
+      </div>
     );
   }
 
