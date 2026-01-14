@@ -180,7 +180,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
       </div>
 
       {/* Controls */}
-      <div className="bg-foreground p-6 pb-8 safe-area-inset-bottom">
+      <div className="bg-foreground p-6 pb-24 safe-area-inset-bottom">
         <div className="flex items-center justify-center gap-6">
           {capturedImage ? (
             <>

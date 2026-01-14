@@ -20,7 +20,7 @@ const buttonVariants = cva(
         optionSelected: "bg-accent text-accent-foreground border-2 border-primary shadow-md text-left justify-start h-auto py-4 px-5",
       },
       size: {
-        default: "h-10 px-4 py-2",
+        default: "px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-12 rounded-xl px-8 text-base",
         xl: "h-14 rounded-xl px-10 text-lg",
@@ -36,7 +36,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

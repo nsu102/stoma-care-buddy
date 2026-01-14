@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, X, Check, Loader2, AlertTriangle, Stethoscope, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, X, Check, Loader2, AlertTriangle, Stethoscope, Save, User } from "lucide-react";
 import iconCalendarHeader from "@/assets/icon-calendar-header.png";
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -19,36 +19,36 @@ const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export default function CalendarPage() {
   const { user } = useAuth();
   const { records, isLoading: diagnosisLoading, getRecordsByDate, getRecordsForMonth } = useDiagnosisHistory();
-  const { 
-    getMemoByDate, 
-    getChecklistsByDate, 
-    saveMemo, 
-    addChecklistItem, 
-    updateChecklistItem, 
-    deleteChecklistItem, 
+  const {
+    getMemoByDate,
+    getChecklistsByDate,
+    saveMemo,
+    addChecklistItem,
+    updateChecklistItem,
+    deleteChecklistItem,
     toggleChecklistItem,
-    isLoading: calendarLoading 
+    isLoading: calendarLoading
   } = useCalendarData();
-  
+
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState("photo");
-  
+
   // Memo state
   const [memoContent, setMemoContent] = useState("");
   const [isMemoEditing, setIsMemoEditing] = useState(false);
   const [isSavingMemo, setIsSavingMemo] = useState(false);
-  
+
   // Checklist state
   const [newChecklistLabel, setNewChecklistLabel] = useState("");
   const [isAddingChecklist, setIsAddingChecklist] = useState(false);
   const [editingChecklistId, setEditingChecklistId] = useState<string | null>(null);
   const [editingChecklistLabel, setEditingChecklistLabel] = useState("");
-  
+
   const isLoading = diagnosisLoading || calendarLoading;
 
   // Get records for selected date
-  const selectedDateRecords = useMemo(() => 
+  const selectedDateRecords = useMemo(() =>
     getRecordsByDate(selectedDate),
     [selectedDate, getRecordsByDate]
   );
@@ -69,7 +69,7 @@ export default function CalendarPage() {
     setIsSavingMemo(true);
     const result = await saveMemo(selectedDate, memoContent);
     setIsSavingMemo(false);
-    
+
     if (result.success) {
       toast.success("메모가 저장되었습니다");
       setIsMemoEditing(false);
@@ -80,7 +80,7 @@ export default function CalendarPage() {
 
   const handleAddChecklist = async () => {
     if (!newChecklistLabel.trim()) return;
-    
+
     const result = await addChecklistItem(selectedDate, newChecklistLabel.trim());
     if (result.success) {
       setNewChecklistLabel("");
@@ -93,7 +93,7 @@ export default function CalendarPage() {
 
   const handleUpdateChecklist = async (id: string) => {
     if (!editingChecklistLabel.trim()) return;
-    
+
     const result = await updateChecklistItem(id, { label: editingChecklistLabel.trim() });
     if (result.success) {
       setEditingChecklistId(null);
@@ -123,7 +123,7 @@ export default function CalendarPage() {
   };
 
   // Get records for current month to display dots
-  const monthRecords = useMemo(() => 
+  const monthRecords = useMemo(() =>
     getRecordsForMonth(currentMonth.getFullYear(), currentMonth.getMonth()),
     [currentMonth, getRecordsForMonth]
   );
@@ -132,7 +132,7 @@ export default function CalendarPage() {
   const getDateStatus = (date: Date): "good" | "warning" | "danger" | null => {
     const dateRecords = getRecordsByDate(date);
     if (dateRecords.length === 0) return null;
-    
+
     const maxRisk = Math.max(...dateRecords.map(r => r.risk_level ?? 0));
     if (maxRisk >= 2) return "danger";  // 위험도 2 = 위험
     if (maxRisk >= 1) return "warning"; // 위험도 1 = 주의
@@ -170,7 +170,7 @@ export default function CalendarPage() {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  
+
   // Get the day of week for the first day (0 = Sunday, we need Monday = 0)
   let startDayOfWeek = getDay(monthStart);
   startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
@@ -194,8 +194,8 @@ export default function CalendarPage() {
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <div className="w-10 h-10 rounded-full bg-primary-foreground/20 overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-sm">
-              👤
+            <div className="w-full h-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center">
+              <User className="h-5 w-5 text-amber-900" />
             </div>
           </div>
         </div>
@@ -204,7 +204,7 @@ export default function CalendarPage() {
           <img src={iconCalendarHeader} alt="루커 캘린더" className="w-20 h-20 object-contain mb-4" />
           <h1 className="text-2xl font-bold text-primary-foreground mb-1">루커 캘린더</h1>
           <p className="text-primary-foreground/70 text-sm">
-            {latestRecord 
+            {latestRecord
               ? `최근 검사: ${format(new Date(latestRecord.created_at), "yyyy. M. d a h:mm", { locale: ko })}`
               : "아직 검사 기록이 없습니다"
             }
@@ -224,9 +224,9 @@ export default function CalendarPage() {
               <Card className="p-4 border-0 shadow-sm">
                 {/* Month Navigation */}
                 <div className="flex items-center justify-between mb-4">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-8 w-8"
                     onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
                   >
@@ -236,9 +236,9 @@ export default function CalendarPage() {
                     <p className="font-semibold text-lg">{format(currentMonth, "M월", { locale: ko })}</p>
                     <p className="text-xs text-muted-foreground">{format(currentMonth, "yyyy")}</p>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-8 w-8"
                     onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
                   >
@@ -306,20 +306,20 @@ export default function CalendarPage() {
 
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className="w-full bg-transparent border-b border-border rounded-none h-auto p-0 mb-4">
-                    <TabsTrigger 
-                      value="photo" 
+                    <TabsTrigger
+                      value="photo"
                       className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
                     >
                       장루 촬영 기록
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="diagnosis" 
+                    <TabsTrigger
+                      value="diagnosis"
                       className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
                     >
                       진단 결과
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="memo" 
+                    <TabsTrigger
+                      value="memo"
                       className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
                     >
                       메모
@@ -332,9 +332,9 @@ export default function CalendarPage() {
                         <Card key={record.id} className="p-4 border-0 shadow-sm">
                           {record.image_url ? (
                             <div className="aspect-video bg-muted rounded-xl overflow-hidden">
-                              <img 
-                                src={record.image_url} 
-                                alt="장루 촬영 이미지" 
+                              <img
+                                src={record.image_url}
+                                alt="장루 촬영 이미지"
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -358,19 +358,17 @@ export default function CalendarPage() {
                   <TabsContent value="diagnosis" className="mt-0 space-y-4">
                     {selectedDateRecords.length > 0 ? (
                       selectedDateRecords.map((record) => (
-                        <Card key={record.id} className={`p-5 border-2 shadow-sm ${
-                          record.risk_level === 2 ? "border-destructive/30" :
-                          record.risk_level === 1 ? "border-warning/30" :
-                          "border-success/30"
-                        }`}>
+                        <Card key={record.id} className={`p-5 border-2 shadow-sm ${record.risk_level === 2 ? "border-destructive/30" :
+                            record.risk_level === 1 ? "border-warning/30" :
+                              "border-success/30"
+                          }`}>
                           {/* 헤더: 진단명 + 위험도 (0=정상, 1=주의, 2=위험) */}
                           <div className="flex items-start justify-between mb-3">
                             <h4 className="font-bold text-lg text-foreground">{record.diagnosis}</h4>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              record.risk_level === 2 ? "bg-destructive/10 text-destructive" :
-                              record.risk_level === 1 ? "bg-warning/10 text-warning" :
-                              "bg-success/10 text-success"
-                            }`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${record.risk_level === 2 ? "bg-destructive/10 text-destructive" :
+                                record.risk_level === 1 ? "bg-warning/10 text-warning" :
+                                  "bg-success/10 text-success"
+                              }`}>
                               위험도 {record.risk_level === 2 ? "높음" : record.risk_level === 1 ? "중간" : "낮음"}
                             </span>
                           </div>
@@ -378,9 +376,9 @@ export default function CalendarPage() {
                           {/* 이미지 (있는 경우) */}
                           {record.image_url && (
                             <div className="aspect-video bg-muted rounded-xl overflow-hidden mb-4">
-                              <img 
-                                src={record.image_url} 
-                                alt="장루 이미지" 
+                              <img
+                                src={record.image_url}
+                                alt="장루 이미지"
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -448,9 +446,9 @@ export default function CalendarPage() {
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-semibold text-foreground">오늘의 메모</h4>
                         {!isMemoEditing ? (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setIsMemoEditing(true)}
                             className="text-primary"
                           >
@@ -459,8 +457,8 @@ export default function CalendarPage() {
                           </Button>
                         ) : (
                           <div className="flex gap-2">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => {
                                 setIsMemoEditing(false);
@@ -469,8 +467,8 @@ export default function CalendarPage() {
                             >
                               <X className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               onClick={handleSaveMemo}
                               disabled={isSavingMemo}
                             >
@@ -486,7 +484,7 @@ export default function CalendarPage() {
                           </div>
                         )}
                       </div>
-                      
+
                       {isMemoEditing ? (
                         <Textarea
                           value={memoContent}
@@ -510,9 +508,9 @@ export default function CalendarPage() {
                   <h3 className="font-semibold text-foreground">
                     {format(selectedDate, "M월 d일", { locale: ko })} 체크리스트
                   </h3>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setIsAddingChecklist(true)}
                     className="text-primary"
                   >
@@ -543,9 +541,9 @@ export default function CalendarPage() {
                         <Button size="icon" className="h-9 w-9" onClick={handleAddChecklist}>
                           <Check className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-9 w-9"
                           onClick={() => {
                             setIsAddingChecklist(false);
@@ -560,7 +558,7 @@ export default function CalendarPage() {
 
                   {selectedDateChecklists.length > 0 ? (
                     selectedDateChecklists.map((item) => (
-                      <Card 
+                      <Card
                         key={item.id}
                         className={`p-4 border-0 shadow-sm ${item.completed ? 'bg-primary/5' : 'bg-card'}`}
                       >
@@ -583,9 +581,9 @@ export default function CalendarPage() {
                               <Button size="icon" className="h-8 w-8" onClick={() => handleUpdateChecklist(item.id)}>
                                 <Check className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 className="h-8 w-8"
                                 onClick={() => {
                                   setEditingChecklistId(null);
@@ -597,11 +595,11 @@ export default function CalendarPage() {
                             </div>
                           ) : (
                             <>
-                              <div 
+                              <div
                                 className="flex items-center gap-3 cursor-pointer flex-1"
                                 onClick={() => handleToggleChecklist(item.id)}
                               >
-                                <Checkbox 
+                                <Checkbox
                                   checked={item.completed}
                                   onCheckedChange={() => handleToggleChecklist(item.id)}
                                   className="h-5 w-5"
@@ -611,17 +609,17 @@ export default function CalendarPage() {
                                 </span>
                               </div>
                               <div className="flex items-center gap-1">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   className="h-8 w-8 text-muted-foreground"
                                   onClick={() => startEditingChecklist(item.id, item.label)}
                                 >
                                   <Edit3 className="h-4 w-4" />
                                 </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                   onClick={() => handleDeleteChecklist(item.id)}
                                 >

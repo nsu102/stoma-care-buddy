@@ -66,7 +66,7 @@ export function QuestionnaireStep({
               <span className="flex-shrink-0 w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-sm font-medium text-secondary-foreground">
                 {index + 1}
               </span>
-              <span className="text-base">{option}</span>
+              <span className="text-base text-wrap">{option}</span>
             </span>
           </Button>
         ))}

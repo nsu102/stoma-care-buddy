@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Lock, Loader2, ArrowLeft, CheckCircle } from "lucide-react";
+import { Mail, Lock, Loader2, ArrowLeft, CheckCircle, Stethoscope } from "lucide-react";
 import { z } from "zod";
 
 const emailSchema = z.string().email("올바른 이메일 형식을 입력해주세요");
@@ -123,7 +123,7 @@ export default function AuthPage() {
 
         <div className="text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary-foreground/20 flex items-center justify-center">
-            <span className="text-4xl">🩺</span>
+            <Stethoscope className="h-12 w-12 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold text-primary-foreground mb-2">루카</h1>
           <p className="text-primary-foreground/70">장루 건강 관리 도우미</p>

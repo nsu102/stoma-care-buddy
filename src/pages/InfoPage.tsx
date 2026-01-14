@@ -1,12 +1,21 @@
 import { Card } from "@/components/ui/card";
-import { 
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { 
+import {
   BookOpen,
+  HelpCircle,
+  Sparkles,
+  Heart,
+  Shield,
+  Droplets,
+  ChevronRight,
+  Camera,
+  BarChart3,
+  RotateCw,
   MapPin,
   Phone,
   Clock
@@ -73,7 +82,7 @@ export default function InfoPage() {
         <h1 className="text-2xl font-bold text-foreground">정보</h1>
         <p className="text-sm text-muted-foreground mt-1">장루 관리에 필요한 모든 정보</p>
       </div>
-      
+
       <div className="px-5 space-y-8">
         {/* Categories Section */}
         <section>
@@ -122,8 +131,8 @@ export default function InfoPage() {
           <div className="space-y-2">
             <Accordion type="single" collapsible className="w-full space-y-2">
               {faqs.map((faq, index) => (
-                <AccordionItem 
-                  key={index} 
+                <AccordionItem
+                  key={index}
                   value={`item-${index}`}
                   className="border border-border rounded-xl px-4 data-[state=open]:bg-muted/30"
                 >
@@ -154,9 +163,9 @@ export default function InfoPage() {
                   <span className="text-sm">지도 영역</span>
                 </div>
               </div>
-            </div>
+            </div >
             {/* Office details */}
-            <div className="p-4 space-y-3">
+            < div className="p-4 space-y-3" >
               <div className="flex items-center gap-3">
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-foreground">{officeInfo.name}</span>
@@ -173,10 +182,10 @@ export default function InfoPage() {
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">{officeInfo.hours}</span>
               </div>
-            </div>
-          </Card>
-        </section>
-      </div>
-    </div>
+            </div >
+          </Card >
+        </section >
+      </div >
+    </div >
   );
 }
