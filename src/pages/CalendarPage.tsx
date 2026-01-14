@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, X, Check, FolderOpen, Loader2, AlertTriangle, Stethoscope, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Edit3, Trash2, X, Check, Loader2, AlertTriangle, Stethoscope, Save } from "lucide-react";
+import iconCalendarHeader from "@/assets/icon-calendar-header.png";
 import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
@@ -200,9 +201,7 @@ export default function CalendarPage() {
         </div>
 
         <div className="flex flex-col items-center text-center">
-          <div className="w-20 h-20 bg-primary-foreground/20 rounded-2xl flex items-center justify-center mb-4">
-            <FolderOpen className="h-10 w-10 text-primary-foreground" />
-          </div>
+          <img src={iconCalendarHeader} alt="루커 캘린더" className="w-20 h-20 object-contain mb-4" />
           <h1 className="text-2xl font-bold text-primary-foreground mb-1">루커 캘린더</h1>
           <p className="text-primary-foreground/70 text-sm">
             {latestRecord 
