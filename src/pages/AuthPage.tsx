@@ -134,7 +134,7 @@ export default function AuthPage() {
       <div className="bg-background rounded-t-3xl min-h-screen px-4 py-8">
         <Card className="max-w-md mx-auto p-6 border-0 shadow-lg">
           <h2 className="text-xl font-bold text-foreground mb-6 text-center">
-            {isSignUp ? "회원가입" : "로그인"} hello world
+            {isSignUp ? "회원가입" : "로그인"}
           </h2>
 
           {error && (
