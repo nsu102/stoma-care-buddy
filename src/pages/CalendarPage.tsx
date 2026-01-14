@@ -597,9 +597,14 @@ export default function CalendarPage() {
                                   onCheckedChange={() => handleToggleChecklist(item.id)}
                                   className="h-5 w-5"
                                 />
-                                <span className={`text-foreground ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
-                                  {item.label}
-                                </span>
+                                <div className="flex flex-col">
+                                  <span className={`text-foreground ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                    {item.label}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {format(new Date(item.date), "yyyy.M.d (EEE)", { locale: ko })}
+                                  </span>
+                                </div>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Button 
