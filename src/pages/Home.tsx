@@ -336,7 +336,16 @@ export default function Home() {
           onCapture={handleImageCapture}
           onCancel={() => setView("main")}
         />
-        {isLoading && <LoadingOverlay message={loadingMessage} />}
+        {isLoading && (
+          <LoadingOverlay 
+            message={loadingMessage} 
+            imageUrl={correctedImageUrl || undefined}
+            onCancel={() => {
+              setIsLoading(false);
+              setView("main");
+            }}
+          />
+        )}
       </>
     );
   }
