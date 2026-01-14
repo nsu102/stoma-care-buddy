@@ -14,7 +14,7 @@ const passwordSchema = z.string().min(6, "비밀번호는 최소 6자 이상이�
 export default function AuthPage() {
   const navigate = useNavigate();
   const { user, signUp, signIn, isLoading: authLoading } = useAuth();
-  
+
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -111,9 +111,9 @@ export default function AuthPage() {
       {/* Header */}
       <div className="px-4 pt-6 pb-12">
         <div className="flex items-center mb-8">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="text-primary-foreground"
             onClick={() => navigate("/")}
           >
@@ -134,7 +134,7 @@ export default function AuthPage() {
       <div className="bg-background rounded-t-3xl min-h-screen px-4 py-8">
         <Card className="max-w-md mx-auto p-6 border-0 shadow-lg">
           <h2 className="text-xl font-bold text-foreground mb-6 text-center">
-            {isSignUp ? "회원가입" : "로그인"}
+            {isSignUp ? "회원가입" : "로그인"} hello world
           </h2>
 
           {error && (
