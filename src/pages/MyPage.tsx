@@ -16,6 +16,7 @@ import iconHelp from "@/assets/icon-help.png";
 import iconTerms from "@/assets/icon-terms.png";
 import iconPrivacy from "@/assets/icon-privacy.png";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
 
 type SettingItem = {
   icon?: LucideIcon;
@@ -56,6 +57,8 @@ const settingsGroups: SettingsGroup[] = [
 ];
 
 export default function MyPage() {
+  const { records } = useDiagnosisHistory();
+
   const { signOut } = useAuth()
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -83,15 +86,20 @@ export default function MyPage() {
           <h3 className="font-semibold text-primary mb-4">나의 건강 요약</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-emerald-500">유의</p>
-              <p className="text-xs text-muted-foreground mt-1">진단 상태</p>
+              <p className="text-2xl font-bold text-warning">
+                {records.length > 0
+                  ? records[0].risk_level === 3 ? "위험" : records[0].risk_level === 2 ? "유의" : "정상"
+                  : "-"
+                }
+              </p>              <p className="text-xs text-muted-foreground mt-1">진단 상태</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">45</p>
-              <p className="text-xs text-muted-foreground mt-1">총 기록일</p>
+              <p className="text-2xl font-bold text-foreground">
+                {new Set(records.map(r => r.created_at.split('T')[0])).size}
+              </p>              <p className="text-xs text-muted-foreground mt-1">총 기록일</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-primary">38</p>
+              <p className="text-2xl font-bold text-primary">{records.length}</p>
               <p className="text-xs text-muted-foreground mt-1">촬영 횟수</p>
             </div>
           </div>
