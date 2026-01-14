@@ -1,13 +1,26 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, FileText, MessageCircle, FolderPlus, Calendar } from "lucide-react";
+import { Loader2, Mail, Lock, FileText, MessageCircle, FolderPlus, Calendar, CheckCircle } from "lucide-react";
+import { z } from "zod";
+
+const emailSchema = z.string().email("올바른 이메일 형식을 입력해주세요");
+const passwordSchema = z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다");
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { user, signInWithGoogle, isLoading: authLoading } = useAuth();
+  const { user, signUp, signIn, signInWithGoogle, isLoading: authLoading } = useAuth();
+  
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -16,15 +29,84 @@ export default function AuthPage() {
     }
   }, [user, authLoading, navigate]);
 
+  const validateInputs = () => {
+    try {
+      emailSchema.parse(email);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        setError(e.errors[0].message);
+        return false;
+      }
+    }
+
+    try {
+      passwordSchema.parse(password);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        setError(e.errors[0].message);
+        return false;
+      }
+    }
+
+    if (isSignUp && password !== confirmPassword) {
+      setError("비밀번호가 일치하지 않습니다");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    if (!validateInputs()) return;
+
+    setIsLoading(true);
+
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password);
+        if (error) {
+          if (error.message.includes("already registered")) {
+            setError("이미 가입된 이메일입니다. 로그인해주세요.");
+          } else {
+            setError(error.message);
+          }
+        } else {
+          setSuccess("회원가입이 완료되었습니다! 로그인해주세요.");
+          setIsSignUp(false);
+          setPassword("");
+          setConfirmPassword("");
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            setError("이메일 또는 비밀번호가 올바르지 않습니다");
+          } else {
+            setError(error.message);
+          }
+        }
+      }
+    } catch (err) {
+      setError("오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const { error } = await signInWithGoogle();
       if (error) {
-        console.error("Google sign in error:", error);
+        setError("Google 로그인 중 오류가 발생했습니다.");
       }
     } catch (err) {
-      console.error("Google sign in error:", err);
+      setError("Google 로그인 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +130,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-accent flex flex-col">
       {/* Logo & Slogan Section */}
-      <div className="flex-1 flex flex-col justify-center px-6 pt-20">
+      <div className="px-6 pt-16 pb-8">
         <div className="animate-fade-in">
           <h1 className="text-6xl font-bold text-primary mb-4">루커</h1>
           <p className="text-xl text-foreground">
@@ -62,8 +144,8 @@ export default function AuthPage() {
       </div>
 
       {/* Features Section */}
-      <div className="px-6 pb-8">
-        <div className="flex justify-start gap-4 overflow-x-auto pb-4 animate-slide-up">
+      <div className="px-6 pb-6">
+        <div className="flex justify-start gap-4 overflow-x-auto pb-2 animate-slide-up">
           {features.map((feature, index) => (
             <div
               key={index}
@@ -77,12 +159,30 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* Google Sign In Button */}
-      <div className="px-6 pb-12 safe-bottom">
+      {/* Auth Form Section */}
+      <div className="flex-1 bg-background rounded-t-3xl px-6 py-8 animate-slide-up">
+        <h2 className="text-xl font-bold text-foreground mb-6 text-center">
+          {isSignUp ? "회원가입" : "로그인"}
+        </h2>
+
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 rounded-lg bg-success/10 border border-success/20 flex items-center gap-2">
+            <CheckCircle className="h-4 w-4 text-success" />
+            <p className="text-sm text-success">{success}</p>
+          </div>
+        )}
+
+        {/* Google Sign In Button */}
         <Button
           variant="outline"
-          size="xl"
-          className="w-full bg-background border-2 border-primary hover:bg-accent"
+          size="lg"
+          className="w-full mb-6 bg-background border-2 border-primary hover:bg-accent"
           onClick={handleGoogleSignIn}
           disabled={isLoading}
         >
@@ -112,6 +212,95 @@ export default function AuthPage() {
             </>
           )}
         </Button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-sm text-muted-foreground">또는</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* Email/Password Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">이메일</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">비밀번호</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+
+          {isSignUp && (
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full h-12"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              isSignUp ? "회원가입" : "로그인"
+            )}
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            {isSignUp ? "이미 계정이 있으신가요?" : "아직 계정이 없으신가요?"}
+          </p>
+          <Button
+            variant="link"
+            className="text-primary"
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setError(null);
+              setSuccess(null);
+            }}
+          >
+            {isSignUp ? "로그인하기" : "회원가입하기"}
+          </Button>
+        </div>
       </div>
     </div>
   );
