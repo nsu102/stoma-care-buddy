@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/AppHeader";
+import { useDiagnosisHistory } from "@/hooks/useDiagnosisHistory";
 import { 
   ChevronRight,
   LogOut,
@@ -55,6 +56,8 @@ const settingsGroups: SettingsGroup[] = [
 ];
 
 export default function MyPage() {
+  const { records } = useDiagnosisHistory();
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <AppHeader title="마이페이지" />
@@ -81,15 +84,22 @@ export default function MyPage() {
           <h3 className="font-semibold text-primary mb-4">나의 건강 요약</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-emerald-500">유의</p>
+              <p className="text-2xl font-bold text-warning">
+                {records.length > 0 
+                  ? records[0].risk_level === 3 ? "위험" : records[0].risk_level === 2 ? "유의" : "정상"
+                  : "-"
+                }
+              </p>
               <p className="text-xs text-muted-foreground mt-1">진단 상태</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">45</p>
+              <p className="text-2xl font-bold text-foreground">
+                {new Set(records.map(r => r.created_at.split('T')[0])).size}
+              </p>
               <p className="text-xs text-muted-foreground mt-1">총 기록일</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-primary">38</p>
+              <p className="text-2xl font-bold text-primary">{records.length}</p>
               <p className="text-xs text-muted-foreground mt-1">촬영 횟수</p>
             </div>
           </div>
