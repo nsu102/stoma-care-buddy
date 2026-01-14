@@ -4,7 +4,6 @@ import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/AppHeader";
 import { 
   User, 
-  Bell, 
   Moon,
   Shield,
   HelpCircle,
@@ -12,15 +11,30 @@ import {
   ChevronRight,
   LogOut,
   Settings,
-  Camera
+  LucideIcon
 } from "lucide-react";
+import iconPushNotification from "@/assets/icon-push-notification.png";
+import iconCameraReminder from "@/assets/icon-camera-reminder.png";
 
-const settingsGroups = [
+type SettingItem = {
+  icon?: LucideIcon;
+  iconImage?: string;
+  label: string;
+  type: "toggle" | "link";
+  enabled?: boolean;
+};
+
+type SettingsGroup = {
+  title: string;
+  items: SettingItem[];
+};
+
+const settingsGroups: SettingsGroup[] = [
   {
     title: "알림 설정",
     items: [
-      { icon: Bell, label: "푸시 알림", type: "toggle", enabled: true },
-      { icon: Camera, label: "촬영 리마인더", type: "toggle", enabled: true },
+      { iconImage: iconPushNotification, label: "푸시 알림", type: "toggle", enabled: true },
+      { iconImage: iconCameraReminder, label: "촬영 리마인더", type: "toggle", enabled: true },
     ]
   },
   {
@@ -96,7 +110,11 @@ export default function MyPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon className="h-5 w-5 text-muted-foreground" />
+                    {item.iconImage ? (
+                      <img src={item.iconImage} alt={item.label} className="h-5 w-5 object-contain" />
+                    ) : item.icon ? (
+                      <item.icon className="h-5 w-5 text-muted-foreground" />
+                    ) : null}
                     <span className="font-medium text-foreground">{item.label}</span>
                   </div>
                   {item.type === "toggle" ? (
