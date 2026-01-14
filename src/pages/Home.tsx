@@ -26,9 +26,6 @@ import {
   Camera, 
   Plus,
   Search,
-  Calendar,
-  FileText,
-  Gift,
   Edit3,
   Trash2,
   Bug,
@@ -37,6 +34,9 @@ import {
   Loader2
 } from "lucide-react";
 import { toast } from "sonner";
+import iconMedicalRecord from "@/assets/icon-medical-record.png";
+import iconCalendar from "@/assets/icon-calendar.png";
+import iconInfo from "@/assets/icon-info.png";
 
 type HomeView = "main" | "camera" | "questionnaire" | "result" | "debug";
 
@@ -508,9 +508,7 @@ export default function Home() {
             className="p-4 border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow text-center"
             onClick={() => navigate("/calendar")}
           >
-            <div className="w-14 h-14 mx-auto mb-2 rounded-2xl bg-rose-50 flex items-center justify-center">
-              <FileText className="h-7 w-7 text-rose-400" />
-            </div>
+            <img src={iconMedicalRecord} alt="진료기록" className="w-14 h-14 mx-auto mb-2 object-contain" />
             <p className="text-sm font-medium text-foreground">진료기록</p>
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning mt-1" />
           </Card>
@@ -519,9 +517,7 @@ export default function Home() {
             className="p-4 border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow text-center"
             onClick={() => navigate("/calendar")}
           >
-            <div className="w-14 h-14 mx-auto mb-2 rounded-2xl bg-pink-50 flex items-center justify-center">
-              <Calendar className="h-7 w-7 text-pink-400" />
-            </div>
+            <img src={iconCalendar} alt="캘린더" className="w-14 h-14 mx-auto mb-2 object-contain" />
             <p className="text-sm font-medium text-foreground">캘린더</p>
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning mt-1" />
           </Card>
@@ -530,9 +526,7 @@ export default function Home() {
             className="p-4 border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow text-center"
             onClick={() => navigate("/info")}
           >
-            <div className="w-14 h-14 mx-auto mb-2 rounded-2xl bg-amber-50 flex items-center justify-center">
-              <Gift className="h-7 w-7 text-amber-400" />
-            </div>
+            <img src={iconInfo} alt="정보" className="w-14 h-14 mx-auto mb-2 object-contain" />
             <p className="text-sm font-medium text-foreground">정보</p>
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning mt-1" />
           </Card>
