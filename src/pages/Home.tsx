@@ -38,7 +38,7 @@ import iconMedicalRecord from "@/assets/icon-medical-record.png";
 import iconCalendar from "@/assets/icon-calendar.png";
 import iconInfo from "@/assets/icon-info.png";
 import iconPhotoCapture from "@/assets/icon-photo-capture.png";
-
+import iconMealkit from "@/assets/icon-mealkit.png";
 type HomeView = "main" | "camera" | "questionnaire" | "result" | "debug";
 
 export default function Home() {
@@ -687,8 +687,8 @@ export default function Home() {
               장루 관리에 부담이 적은 식단,<br/>맞춤 밀키트로 시작해보세요!
             </p>
           </div>
-          <div className="absolute right-2 bottom-2 w-24 h-24 opacity-80">
-            🍱
+          <div className="absolute right-2 bottom-2 w-24 h-24 flex items-center justify-center">
+            <img src={iconMealkit} alt="밀키트" className="w-20 h-20 object-contain" />
           </div>
         </Card>
 
